@@ -21,3 +21,6 @@ shap>=0.41.0
 # Optional: For Excel file reading (if needed)
 openpyxl>=3.0.0
 xlrd>=2.0.0
+
+# Workflow Orchestration
+apache-airflow>=2.7.0
