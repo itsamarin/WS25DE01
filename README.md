@@ -552,12 +552,6 @@ All outputs will be regenerated identically from the code, ensuring full reprodu
 
 This project is for educational purposes as part of the **WS25DE01 Data Engineering** course.
 
-## Contributors
-
-- ES25DE01 Project Team
-- Institution: [Your University Name]
-- Course: Data Engineering WS 2025
-
 ## Contact
 
 For questions or issues about this project:
