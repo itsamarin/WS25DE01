@@ -255,9 +255,10 @@ WS25DE01/
 - `plot_rq4_fig3_confusion_matrices()` - Confusion matrices for both models
 - `plot_rq4_fig4_runtime_comparison()` - Training/prediction time comparison
 - `plot_rq4_fig5_feature_importance()` - Top predictive features bar plot
+- `plot_rq4_fig6_shap_importance()` - SHAP global feature importance analysis
 
 **Outputs:**
-- All 18 PDF figures in `figures/` directory (RQ1_Fig1.pdf through RQ4_Fig5.pdf)
+- All 19 PDF figures in `figures/` directory (RQ1_Fig1.pdf through RQ4_Fig6.pdf)
 
 ## Installation
 
@@ -520,9 +521,10 @@ Each task must complete successfully before the next task begins.
 All figures and tables in this project are **automatically generated from code**. No manually created visualizations or tables are included.
 
 **Figure Generation:**
-- All 18 PDF figures in [figures/](figures/) are programmatically created using matplotlib/seaborn
+- All 19 PDF figures in [figures/](figures/) are programmatically created using matplotlib/seaborn/SHAP
 - Figure generation code is in [src/evaluation/visualizations.py](src/evaluation/visualizations.py)
 - Each research question (RQ1-RQ4) has dedicated plotting functions
+- RQ4_Fig6 uses SHAP (SHapley Additive exPlanations) for interpretable feature importance
 - Running the pipeline or calling individual plot functions automatically saves figures to figures/
 
 **Table Generation:**

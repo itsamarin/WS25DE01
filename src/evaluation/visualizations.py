@@ -591,6 +591,91 @@ def plot_rq4_fig5_feature_importance(importance_df, top_n=15, save_path="figures
     print("RQ4_Fig5 Caption: Top features contributing to academic performance prediction")
 
 
+def plot_rq4_fig6_shap_importance(rf_trained, X_test, save_path="figures/RQ4_Fig6.pdf"):
+    """
+    RQ4_Fig6: SHAP Feature Importance for Academic Performance (Random Forest)
+
+    Uses SHAP (SHapley Additive exPlanations) to show global feature importance.
+
+    Args:
+        rf_trained: Trained Random Forest pipeline
+        X_test: Test feature set
+        save_path: Path to save the figure
+    """
+    import shap
+
+    print("Generating SHAP values...")
+
+    # The RF model is inside a pipeline, so we access it via the 'model' step
+    rf_model = rf_trained.named_steps['model']
+    preprocessor = rf_trained.named_steps['preprocess']
+
+    # Preprocess X_test data
+    X_test_processed = preprocessor.transform(X_test)
+
+    # Ensure X_test_processed is a dense array for SHAP
+    if hasattr(X_test_processed, 'toarray'):
+        X_test_processed = X_test_processed.toarray()
+
+    # Get feature names after preprocessing
+    try:
+        feature_names_out = preprocessor.get_feature_names_out()
+    except AttributeError:
+        # Fallback if get_feature_names_out doesn't exist
+        try:
+            numeric_features = preprocessor.named_transformers_['num'].feature_names_in_
+            categorical_features = preprocessor.named_transformers_['cat'].feature_names_in_
+            numeric_feature_names = preprocessor.named_transformers_['num'].get_feature_names_out(numeric_features)
+            categorical_feature_names = preprocessor.named_transformers_['cat'].get_feature_names_out(categorical_features)
+            feature_names_out = np.concatenate([numeric_feature_names, categorical_feature_names])
+        except:
+            feature_names_out = [f"feature_{i}" for i in range(X_test_processed.shape[1])]
+
+    # Initialize SHAP TreeExplainer
+    explainer = shap.TreeExplainer(rf_model)
+
+    # Compute SHAP values for all classes first to inspect their structure
+    all_shap_values = explainer.shap_values(X_test_processed)
+
+    print(f"Type of all_shap_values: {type(all_shap_values)}")
+    if isinstance(all_shap_values, list):
+        print(f"Number of elements in all_shap_values list: {len(all_shap_values)}")
+        for i, sv_arr in enumerate(all_shap_values):
+            print(f"Shape of shap_values_list[{i}]: {sv_arr.shape}")
+        # For binary classification, use class 1 (positive class)
+        shap_values = all_shap_values[1] if len(all_shap_values) == 2 else all_shap_values[0]
+    else:
+        print(f"Shape of all_shap_values (if not list): {all_shap_values.shape}")
+        # Handle 3D array for multi-class
+        if len(all_shap_values.shape) == 3:
+            shap_values = all_shap_values[:, :, 1]
+        else:
+            shap_values = all_shap_values
+
+    # Add explicit assertion to catch the mismatch early
+    assert X_test_processed.shape[1] == shap_values.shape[1], \
+        f"FATAL ERROR: X_test_processed.shape[1] ({X_test_processed.shape[1]}) " \
+        f"does not match shap_values.shape[1] ({shap_values.shape[1]})"
+
+    assert X_test_processed.shape[1] == len(feature_names_out), \
+        f"FATAL ERROR: X_test_processed.shape[1] ({X_test_processed.shape[1]}) " \
+        f"does not match len(feature_names_out) ({len(feature_names_out)})"
+
+    # Generate a SHAP summary plot (bar type)
+    plt.figure(figsize=(12, 8))
+    shap.summary_plot(shap_values, X_test_processed, feature_names=feature_names_out,
+                     plot_type="bar", show=False)
+    plt.title('RQ4_Fig6: SHAP Feature Importance for Academic Performance (Random Forest)')
+    plt.tight_layout()
+
+    # Save the plot
+    plt.savefig(save_path, bbox_inches='tight')
+    print(f"Saved to {save_path}")
+    plt.close()
+
+    print("RQ4_Fig6 Caption: SHAP summary plot illustrating the global importance of features in predicting academic performance (pass/fail) using the Random Forest model.")
+
+
 # ==============================================================================
 # Main execution for generating all figures
 # ==============================================================================
