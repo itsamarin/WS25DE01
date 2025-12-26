@@ -562,7 +562,7 @@ This project is for educational purposes as part of the **WS25DE01 Data Engineer
 
 For questions or issues about this project:
 - Open an issue in this repository
-- Contact: [Your Email or Team Contact]
+- Contact: amrin.yanya@gmail.com
 
 ## Acknowledgments
 
