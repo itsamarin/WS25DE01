@@ -100,7 +100,7 @@ python -m src.evaluation.metrics
 python -m src.evaluation.visualizations
 ```
 
-## Project Structure
+## Folder Structure Explanation
 
 ```
 WS25DE01/
@@ -152,13 +152,6 @@ WS25DE01/
     ├── rf_pass_prediction.pkl
     └── linear_regression_model.pkl
 ```
-
-**Key Folders:**
-- **dags/**: Airflow pipeline orchestration
-- **src/**: Modular code (ingestion → cleaning → features → modeling → evaluation)
-- **figures/**: Auto-generated PDFs (19 visualizations for RQ1-RQ4)
-- **tables/**: Auto-generated XLSX (performance metrics, fairness analysis)
-- **models/**: Serialized model artifacts (.pkl)
 
 ## Pipeline Stages
 
