@@ -1,5 +1,7 @@
 # Academic Performance Prediction via Data Fusion
 
+## Project overview
+
 End-to-end ML pipeline predicting student performance using multi-source data fusion (academic, demographic, behavioral features) from Portuguese secondary schools.
 
 **Key Features:**
@@ -22,8 +24,11 @@ End-to-end ML pipeline predicting student performance using multi-source data fu
 ## Research Questions
 
 **RQ1:** Does multi-source data (demographic + behavioral + academic) outperform academic-only features (G1, G2)?
+
 **RQ2:** How do parental education and family support impact student outcomes?
+
 **RQ3:** Are models fair across demographic subgroups (gender, parental education, support)?
+
 **RQ4:** Which features most influence student success? (permutation importance + SHAP)
 
 ## Installation
