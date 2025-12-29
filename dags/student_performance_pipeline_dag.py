@@ -232,8 +232,8 @@ def task_generate_figures(**context):
         - figures/RQ2_Fig*.pdf (Parental education impact)
         - figures/RQ3_Fig*.pdf (Fairness analysis)
         - figures/RQ4_Fig*.pdf (Feature importance)
-        - tables/RQ1_Table1.csv (Model performance metrics)
-        - tables/RQ3_Table1.csv (Fairness metrics)
+        - tables/RQ1_Table1.xlsx (Model performance metrics)
+        - tables/RQ3_Table1.xlsx (Fairness metrics)
     """
     print("Generating figures and tables...")
 

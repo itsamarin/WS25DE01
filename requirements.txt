@@ -18,7 +18,7 @@ kagglehub>=0.1.0
 # Model Explainability
 shap>=0.41.0
 
-# Optional: For Excel file reading (if needed)
+# Excel file support (reading and writing)
 openpyxl>=3.0.0
 xlrd>=2.0.0
 

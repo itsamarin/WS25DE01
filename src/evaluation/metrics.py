@@ -59,7 +59,7 @@ def compare_models(
     results_df = pd.DataFrame(results)
 
     if save_path:
-        results_df.to_csv(save_path, index=False)
+        results_df.to_excel(save_path, index=False)
         print(f"Saved model comparison table to {save_path}")
 
     return results_df
@@ -133,25 +133,25 @@ def calculate_permutation_importance(
 
 def save_feature_importance(
     fi_df: pd.DataFrame,
-    full_path: str = "figures/feature_importance_rf_full.csv",
+    full_path: str = "figures/feature_importance_rf_full.xlsx",
     top_n: int = 15,
-    top_path: str = "figures/feature_importance_rf_top15.csv"
+    top_path: str = "figures/feature_importance_rf_top15.xlsx"
 ) -> None:
     """
     Save feature importance tables (full and top N).
 
     Args:
         fi_df: Feature importance DataFrame
-        full_path: Path to save full importance table (default: "figures/feature_importance_rf_full.csv")
+        full_path: Path to save full importance table (default: "figures/feature_importance_rf_full.xlsx")
         top_n: Number of top features to save separately (default: 15)
-        top_path: Path to save top N features (default: "figures/feature_importance_rf_top15.csv")
+        top_path: Path to save top N features (default: "figures/feature_importance_rf_top15.xlsx")
     """
     # Save full table
-    fi_df.to_csv(full_path, index=False)
+    fi_df.to_excel(full_path, index=False)
 
     # Save top N
     fi_top = fi_df.head(top_n)
-    fi_top.to_csv(top_path, index=False)
+    fi_top.to_excel(top_path, index=False)
 
     print(f"Saved feature importance tables to {full_path} and {top_path}")
     print(f"\nTop {top_n} features:")
@@ -232,8 +232,8 @@ def calculate_fairness_metrics(
             fairness_results[attr] = fair_df
 
             # Save to file
-            save_path = f"{save_dir}/fairness_by_{attr}.csv"
-            fair_df.to_csv(save_path, index=False)
+            save_path = f"{save_dir}/fairness_by_{attr}.xlsx"
+            fair_df.to_excel(save_path, index=False)
             print(f"Saved fairness metrics for '{attr}' to {save_path}")
 
             # Display
@@ -320,7 +320,7 @@ def calculate_advanced_fairness_metrics(
     y_pred: pd.Series,
     subgroup_data: pd.DataFrame,
     sensitive_attributes: List[str] = None,
-    save_path: str = "figures/RQ3_Table1.csv"
+    save_path: str = "figures/RQ3_Table1.xlsx"
 ) -> pd.DataFrame:
     """
     Calculate advanced fairness metrics (demographic parity, equal opportunity).
@@ -330,7 +330,7 @@ def calculate_advanced_fairness_metrics(
         y_pred: Predicted labels
         subgroup_data: DataFrame with sensitive attributes and predictions
         sensitive_attributes: List of attributes to analyze (default: ["sex", "Medu"])
-        save_path: Path to save fairness table (default: "figures/RQ3_Table1.csv")
+        save_path: Path to save fairness table (default: "figures/RQ3_Table1.xlsx")
 
     Returns:
         pd.DataFrame: Fairness metrics table
@@ -387,7 +387,7 @@ def calculate_advanced_fairness_metrics(
 
     # Save
     if save_path:
-        fairness_df.to_csv(save_path, index=False)
+        fairness_df.to_excel(save_path, index=False)
         print(f"Saved advanced fairness metrics to {save_path}")
 
     print("\nAdvanced Fairness Metrics:")

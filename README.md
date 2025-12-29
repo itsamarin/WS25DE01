@@ -326,7 +326,7 @@ All figures and tables in this project are **automatically generated from code**
 - Running the pipeline or calling individual plot functions automatically saves figures to figures/
 
 **Table Generation:**
-- All CSV tables in [tables/](tables/) are programmatically created using pandas
+- All XLSX tables in [tables/](tables/) are programmatically created using pandas
 - Table generation code is in [src/evaluation/metrics.py](src/evaluation/metrics.py)
 - Tables are saved automatically during model evaluation
 - Tables include model performance metrics and fairness analysis results
@@ -335,7 +335,7 @@ All figures and tables in this project are **automatically generated from code**
 To verify reproducibility, delete all figures and tables and re-run the evaluation:
 ```bash
 # Delete existing outputs
-rm -rf figures/*.pdf tables/*.csv
+rm -rf figures/*.pdf tables/*.xlsx
 
 # Regenerate all outputs
 python -m src.evaluation.metrics
@@ -386,9 +386,9 @@ WS25DE01/
 │   ├── RQ3_Fig*.pdf                        # Fairness analysis
 │   └── RQ4_Fig*.pdf                        # Feature importance
 │
-├── tables/                                 # Auto-generated tables (CSV format)
-│   ├── RQ1_Table1.csv                      # Model performance metrics
-│   └── RQ3_Table1.csv                      # Fairness metrics
+├── tables/                                 # Auto-generated tables (XLSX format)
+│   ├── RQ1_Table1.xlsx                     # Model performance metrics
+│   └── RQ3_Table1.xlsx                     # Fairness metrics
 │
 ├── requirements.txt                        # Python dependencies
 ├── .gitignore                              # Git ignore configuration
@@ -404,7 +404,7 @@ WS25DE01/
 - **src/**: Modular Python code organized by pipeline stage (ingestion → cleaning → features → modeling → evaluation)
 - **data/sample/**: Only small sample data files (full datasets downloaded at runtime)
 - **figures/**: All visualizations automatically generated as PDFs from code
-- **tables/**: All data tables automatically generated as CSV/Excel from code
+- **tables/**: All data tables automatically generated as XLSX from code
 - **models/**: Serialized trained model artifacts
 
 ## Module Overview
@@ -507,13 +507,13 @@ WS25DE01/
   - `famsup` - Family support (yes/no)
 
 **Outputs:**
-- `figures/model_comparison.csv`
-- `figures/feature_importance_rf_full.csv`
-- `figures/feature_importance_rf_top15.csv`
-- `figures/fairness_by_sex.csv`
-- `figures/fairness_by_Medu.csv`
-- `figures/fairness_by_schoolsup.csv`
-- `figures/fairness_by_famsup.csv`
+- `figures/model_comparison.xlsx`
+- `figures/feature_importance_rf_full.xlsx`
+- `figures/feature_importance_rf_top15.xlsx`
+- `figures/fairness_by_sex.xlsx`
+- `figures/fairness_by_Medu.xlsx`
+- `figures/fairness_by_schoolsup.xlsx`
+- `figures/fairness_by_famsup.xlsx`
 
 #### 5.2 Visualizations (`visualizations.py`)
 **Purpose:** Generate all research question figures programmatically.
