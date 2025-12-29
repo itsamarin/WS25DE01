@@ -1,0 +1,7 @@
+# Model files
+models/*.pkl
+models/*.h5
+models/*.pt
+models/*.pth
+models/*.joblib
+models/*.model

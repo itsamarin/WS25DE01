@@ -390,13 +390,13 @@ WS25DE01/
 │   ├── RQ1_Table1.csv                      # Model performance metrics
 │   └── RQ3_Table1.csv                      # Fairness metrics
 │
-├── models/                                 # Saved trained models
-│   ├── rf_pass_prediction.pkl
-│   └── linear_regression_model.pkl
-│
 ├── requirements.txt                        # Python dependencies
 ├── .gitignore                              # Git ignore configuration
-└── README.md                               # This file
+├── README.md                               # This file
+│
+└── models/                                 # Saved trained models
+    ├── rf_pass_prediction.pkl
+    └── linear_regression_model.pkl
 ```
 
 **Folder Structure Explanation:**
