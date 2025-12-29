@@ -58,208 +58,6 @@ This project addresses four key research questions:
 - Which features are most influential in predicting student success?
 - Methodology: Use permutation importance and SHAP values to identify top predictive features
 
-## Project Structure
-
-```
-WS25DE01/
-│
-├── dags/                                    # Airflow DAGs
-│   └── student_performance_pipeline_dag.py # Main pipeline orchestration
-│
-├── src/                                     # Core code modules
-│   ├── data_ingestion/                     # Data downloading and loading
-│   │   ├── __init__.py
-│   │   └── loader.py                       # Kaggle data download and CSV conversion
-│   │
-│   ├── data_cleaning/                      # Data preprocessing and cleaning
-│   │   ├── __init__.py
-│   │   └── cleaner.py                      # Missing value handling, data combination
-│   │
-│   ├── feature_engineering/                # Feature creation and ABT
-│   │   ├── __init__.py
-│   │   └── features.py                     # Derived features and target creation
-│   │
-│   ├── modeling/                           # Model training and pipelines
-│   │   ├── __init__.py
-│   │   ├── preprocessing.py                # Preprocessing transformers
-│   │   └── train.py                        # Model training (RF, LR, Linear Regression)
-│   │
-│   └── evaluation/                         # Model evaluation and fairness
-│       ├── __init__.py
-│       ├── metrics.py                      # Performance metrics, feature importance, fairness
-│       └── visualizations.py               # All RQ figure generation code (RQ1-RQ4)
-│
-├── data/                                   # Data storage (NO large raw datasets in Git)
-│   └── sample/                             # Sample data files only
-│
-├── figures/                                # Auto-generated visualizations (PDF format)
-│   ├── RQ1_Fig*.pdf                        # Model comparison figures
-│   ├── RQ2_Fig*.pdf                        # Parental education impact
-│   ├── RQ3_Fig*.pdf                        # Fairness analysis
-│   └── RQ4_Fig*.pdf                        # Feature importance
-│
-├── tables/                                 # Auto-generated tables (CSV format)
-│   ├── RQ1_Table1.csv                      # Model performance metrics
-│   └── RQ3_Table1.csv                      # Fairness metrics
-│
-├── models/                                 # Saved trained models
-│   ├── rf_pass_prediction.pkl
-│   └── linear_regression_model.pkl
-│
-├── requirements.txt                        # Python dependencies
-├── .gitignore                              # Git ignore configuration
-└── README.md                               # This file
-```
-
-**Folder Structure Explanation:**
-- **dags/**: Contains Airflow DAG definitions for pipeline orchestration
-- **src/**: Modular Python code organized by pipeline stage (ingestion → cleaning → features → modeling → evaluation)
-- **data/sample/**: Only small sample data files (full datasets downloaded at runtime)
-- **figures/**: All visualizations automatically generated as PDFs from code
-- **tables/**: All data tables automatically generated as CSV/Excel from code
-- **models/**: Serialized trained model artifacts
-
-## Module Overview
-
-### 1. Data Ingestion (`src/data_ingestion/`)
-**Purpose:** Download and load student performance datasets from Kaggle.
-
-**Key Functions:**
-- `create_directory_structure()` - Creates project folder structure
-- `download_student_performance_data()` - Downloads dataset from Kaggle
-- `load_and_save_datasets()` - Loads Excel files and saves as CSV
-- `ingest_data()` - Complete ingestion pipeline
-
-**Outputs:**
-- `data/raw/maths/Maths.csv`
-- `data/raw/portuguese/Portuguese.csv`
-
-### 2. Data Cleaning (`src/data_cleaning/`)
-**Purpose:** Combine, clean, and preprocess student performance datasets.
-
-**Key Functions:**
-- `add_course_labels()` - Adds course identifier (math/portuguese)
-- `combine_datasets()` - Merges Math and Portuguese datasets
-- `handle_empty_strings()` - Replaces empty strings with pd.NA
-- `impute_numeric_columns()` - Fills missing numeric values with median
-- `impute_categorical_columns()` - Fills missing categorical values with "unknown"
-- `clean_student_performance_data()` - Complete cleaning pipeline
-
-**Outputs:**
-- `data/cleaned/student_performance_clean.csv`
-
-### 3. Feature Engineering (`src/feature_engineering/`)
-**Purpose:** Create derived features and analytical base table (ABT).
-
-**Key Functions:**
-- `create_average_previous_grade()` - Averages G1 and G2
-- `create_grade_trend()` - Calculates grade change (G3 - G1)
-- `create_high_absence_indicator()` - Binary indicator for high absences
-- `create_target_pass()` - Binary classification target (pass/fail)
-- `build_analytical_base_table()` - Complete feature engineering pipeline
-
-**Features Created:**
-- `avg_prev_grade` - Mean of G1 and G2
-- `grade_trend` - Grade change from G1 to G3
-- `high_absence` - Binary indicator (1 if absences > median)
-- `target_pass` - Binary target (1 if G3 >= 10)
-
-**Outputs:**
-- `data/processed/abt_student_performance.csv`
-
-### 4. Modeling (`src/modeling/`)
-**Purpose:** Define preprocessing pipelines and train classification/regression models.
-
-#### 4.1 Preprocessing (`preprocessing.py`)
-**Key Functions:**
-- `get_numeric_categorical_features()` - Identifies feature types
-- `create_multi_source_preprocessor()` - StandardScaler + OneHotEncoder for all features
-- `create_academic_only_preprocessor()` - StandardScaler for G1, G2 only
-- `create_regression_preprocessor()` - Preprocessing for regression models
-
-#### 4.2 Training (`train.py`)
-**Key Functions:**
-- `load_abt()` - Loads analytical base table
-- `prepare_data()` - Separates features and target
-- `split_data()` - Train-test split with stratification
-- `train_multi_source_models()` - Trains LR and RF with all features
-- `train_academic_only_models()` - Trains LR and RF with G1, G2 only
-- `train_regression_model()` - Trains linear regression for G3 prediction
-- `save_model()` / `load_model()` - Model persistence
-
-**Models Trained:**
-- **Multi-Source Logistic Regression** - All features
-- **Multi-Source Random Forest** - All features (n_estimators=300)
-- **Single-Source Logistic Regression** - G1, G2 only
-- **Single-Source Random Forest** - G1, G2 only
-- **Linear Regression** - Predicts final grade (G3)
-
-**Outputs:**
-- `models/rf_pass_prediction.pkl`
-- `models/linear_regression_model.pkl`
-
-### 5. Evaluation (`src/evaluation/`)
-**Purpose:** Evaluate model performance, feature importance, and fairness.
-
-#### 5.1 Metrics (`metrics.py`)
-**Key Functions:**
-- `evaluate_model()` - Calculates accuracy, precision, recall, F1
-- `compare_models()` - Compares multiple models
-- `calculate_permutation_importance()` - Feature importance via permutation
-- `subgroup_metrics()` - Performance metrics by demographic subgroup
-- `calculate_fairness_metrics()` - Fairness analysis for sensitive attributes
-- `demographic_parity_difference()` - Demographic parity metric
-- `equal_opportunity_difference()` - Equal opportunity (TPR) metric
-
-**Fairness Analysis:**
-- Analyzes model performance across demographic subgroups:
-  - `sex` - Gender (M/F)
-  - `Medu` - Mother's education level (0-4)
-  - `schoolsup` - School support (yes/no)
-  - `famsup` - Family support (yes/no)
-
-**Outputs:**
-- `figures/model_comparison.csv`
-- `figures/feature_importance_rf_full.csv`
-- `figures/feature_importance_rf_top15.csv`
-- `figures/fairness_by_sex.csv`
-- `figures/fairness_by_Medu.csv`
-- `figures/fairness_by_schoolsup.csv`
-- `figures/fairness_by_famsup.csv`
-
-#### 5.2 Visualizations (`visualizations.py`)
-**Purpose:** Generate all research question figures programmatically.
-
-**RQ1 Figures (Multi-Source vs Single-Source):**
-- `plot_rq1_fig1_model_comparison()` - Performance comparison bar plot
-- `plot_rq1_fig2_grade_scatter()` - G1 vs G2 scatter plot by pass/fail
-- `plot_rq1_fig3_improvement()` - Improvement percentage comparison
-- `plot_rq1_fig4_studytime_boxplot()` - Grades by study time
-
-**RQ2 Figures (Parental Education & Support):**
-- `plot_rq2_fig1_parental_education()` - Mean grade by parental education
-- `plot_rq2_fig2_resilience_drivers()` - Key drivers for low education group
-- `plot_rq2_fig3_grade_improvement_trend()` - Education-location interaction
-- `plot_rq2_fig4_improvement_heatmap()` - Improvement probability heatmap
-- `plot_rq2_fig5_parental_ed_by_address()` - Education level by location trends
-
-**RQ3 Figures (Model Fairness):**
-- `plot_rq3_fig1_fairness_gap()` - F1-score gaps from baseline
-- `plot_rq3_fig2_subgroup_heatmap()` - Subgroup performance heatmap
-- `plot_rq3_fig3_subgroup_performance()` - Performance by demographics
-- `plot_rq3_fig4_fairness_metrics()` - Demographic parity & equal opportunity
-
-**RQ4 Figures (Feature Importance):**
-- `plot_rq4_fig1_feature_stability()` - Cross-validation feature stability
-- `plot_rq4_fig2_model_comparison()` - LR vs RF performance
-- `plot_rq4_fig3_confusion_matrices()` - Confusion matrices for both models
-- `plot_rq4_fig4_runtime_comparison()` - Training/prediction time comparison
-- `plot_rq4_fig5_feature_importance()` - Top predictive features bar plot
-- `plot_rq4_fig6_shap_importance()` - SHAP global feature importance analysis
-
-**Outputs:**
-- All 19 PDF figures in `figures/` directory (RQ1_Fig1.pdf through RQ4_Fig6.pdf)
-
 ## Installation
 
 ### Prerequisites
@@ -548,6 +346,208 @@ Alternatively, run the complete Airflow DAG which will regenerate all figures an
 
 All outputs will be regenerated identically from the code, ensuring full reproducibility.
 
+## Project Structure
+
+```
+WS25DE01/
+│
+├── dags/                                    # Airflow DAGs
+│   └── student_performance_pipeline_dag.py # Main pipeline orchestration
+│
+├── src/                                     # Core code modules
+│   ├── data_ingestion/                     # Data downloading and loading
+│   │   ├── __init__.py
+│   │   └── loader.py                       # Kaggle data download and CSV conversion
+│   │
+│   ├── data_cleaning/                      # Data preprocessing and cleaning
+│   │   ├── __init__.py
+│   │   └── cleaner.py                      # Missing value handling, data combination
+│   │
+│   ├── feature_engineering/                # Feature creation and ABT
+│   │   ├── __init__.py
+│   │   └── features.py                     # Derived features and target creation
+│   │
+│   ├── modeling/                           # Model training and pipelines
+│   │   ├── __init__.py
+│   │   ├── preprocessing.py                # Preprocessing transformers
+│   │   └── train.py                        # Model training (RF, LR, Linear Regression)
+│   │
+│   └── evaluation/                         # Model evaluation and fairness
+│       ├── __init__.py
+│       ├── metrics.py                      # Performance metrics, feature importance, fairness
+│       └── visualizations.py               # All RQ figure generation code (RQ1-RQ4)
+│
+├── data/                                   # Data storage (NO large raw datasets in Git)
+│   └── sample/                             # Sample data files only
+│
+├── figures/                                # Auto-generated visualizations (PDF format)
+│   ├── RQ1_Fig*.pdf                        # Model comparison figures
+│   ├── RQ2_Fig*.pdf                        # Parental education impact
+│   ├── RQ3_Fig*.pdf                        # Fairness analysis
+│   └── RQ4_Fig*.pdf                        # Feature importance
+│
+├── tables/                                 # Auto-generated tables (CSV format)
+│   ├── RQ1_Table1.csv                      # Model performance metrics
+│   └── RQ3_Table1.csv                      # Fairness metrics
+│
+├── models/                                 # Saved trained models
+│   ├── rf_pass_prediction.pkl
+│   └── linear_regression_model.pkl
+│
+├── requirements.txt                        # Python dependencies
+├── .gitignore                              # Git ignore configuration
+└── README.md                               # This file
+```
+
+**Folder Structure Explanation:**
+- **dags/**: Contains Airflow DAG definitions for pipeline orchestration
+- **src/**: Modular Python code organized by pipeline stage (ingestion → cleaning → features → modeling → evaluation)
+- **data/sample/**: Only small sample data files (full datasets downloaded at runtime)
+- **figures/**: All visualizations automatically generated as PDFs from code
+- **tables/**: All data tables automatically generated as CSV/Excel from code
+- **models/**: Serialized trained model artifacts
+
+## Module Overview
+
+### 1. Data Ingestion (`src/data_ingestion/`)
+**Purpose:** Download and load student performance datasets from Kaggle.
+
+**Key Functions:**
+- `create_directory_structure()` - Creates project folder structure
+- `download_student_performance_data()` - Downloads dataset from Kaggle
+- `load_and_save_datasets()` - Loads Excel files and saves as CSV
+- `ingest_data()` - Complete ingestion pipeline
+
+**Outputs:**
+- `data/raw/maths/Maths.csv`
+- `data/raw/portuguese/Portuguese.csv`
+
+### 2. Data Cleaning (`src/data_cleaning/`)
+**Purpose:** Combine, clean, and preprocess student performance datasets.
+
+**Key Functions:**
+- `add_course_labels()` - Adds course identifier (math/portuguese)
+- `combine_datasets()` - Merges Math and Portuguese datasets
+- `handle_empty_strings()` - Replaces empty strings with pd.NA
+- `impute_numeric_columns()` - Fills missing numeric values with median
+- `impute_categorical_columns()` - Fills missing categorical values with "unknown"
+- `clean_student_performance_data()` - Complete cleaning pipeline
+
+**Outputs:**
+- `data/cleaned/student_performance_clean.csv`
+
+### 3. Feature Engineering (`src/feature_engineering/`)
+**Purpose:** Create derived features and analytical base table (ABT).
+
+**Key Functions:**
+- `create_average_previous_grade()` - Averages G1 and G2
+- `create_grade_trend()` - Calculates grade change (G3 - G1)
+- `create_high_absence_indicator()` - Binary indicator for high absences
+- `create_target_pass()` - Binary classification target (pass/fail)
+- `build_analytical_base_table()` - Complete feature engineering pipeline
+
+**Features Created:**
+- `avg_prev_grade` - Mean of G1 and G2
+- `grade_trend` - Grade change from G1 to G3
+- `high_absence` - Binary indicator (1 if absences > median)
+- `target_pass` - Binary target (1 if G3 >= 10)
+
+**Outputs:**
+- `data/processed/abt_student_performance.csv`
+
+### 4. Modeling (`src/modeling/`)
+**Purpose:** Define preprocessing pipelines and train classification/regression models.
+
+#### 4.1 Preprocessing (`preprocessing.py`)
+**Key Functions:**
+- `get_numeric_categorical_features()` - Identifies feature types
+- `create_multi_source_preprocessor()` - StandardScaler + OneHotEncoder for all features
+- `create_academic_only_preprocessor()` - StandardScaler for G1, G2 only
+- `create_regression_preprocessor()` - Preprocessing for regression models
+
+#### 4.2 Training (`train.py`)
+**Key Functions:**
+- `load_abt()` - Loads analytical base table
+- `prepare_data()` - Separates features and target
+- `split_data()` - Train-test split with stratification
+- `train_multi_source_models()` - Trains LR and RF with all features
+- `train_academic_only_models()` - Trains LR and RF with G1, G2 only
+- `train_regression_model()` - Trains linear regression for G3 prediction
+- `save_model()` / `load_model()` - Model persistence
+
+**Models Trained:**
+- **Multi-Source Logistic Regression** - All features
+- **Multi-Source Random Forest** - All features (n_estimators=300)
+- **Single-Source Logistic Regression** - G1, G2 only
+- **Single-Source Random Forest** - G1, G2 only
+- **Linear Regression** - Predicts final grade (G3)
+
+**Outputs:**
+- `models/rf_pass_prediction.pkl`
+- `models/linear_regression_model.pkl`
+
+### 5. Evaluation (`src/evaluation/`)
+**Purpose:** Evaluate model performance, feature importance, and fairness.
+
+#### 5.1 Metrics (`metrics.py`)
+**Key Functions:**
+- `evaluate_model()` - Calculates accuracy, precision, recall, F1
+- `compare_models()` - Compares multiple models
+- `calculate_permutation_importance()` - Feature importance via permutation
+- `subgroup_metrics()` - Performance metrics by demographic subgroup
+- `calculate_fairness_metrics()` - Fairness analysis for sensitive attributes
+- `demographic_parity_difference()` - Demographic parity metric
+- `equal_opportunity_difference()` - Equal opportunity (TPR) metric
+
+**Fairness Analysis:**
+- Analyzes model performance across demographic subgroups:
+  - `sex` - Gender (M/F)
+  - `Medu` - Mother's education level (0-4)
+  - `schoolsup` - School support (yes/no)
+  - `famsup` - Family support (yes/no)
+
+**Outputs:**
+- `figures/model_comparison.csv`
+- `figures/feature_importance_rf_full.csv`
+- `figures/feature_importance_rf_top15.csv`
+- `figures/fairness_by_sex.csv`
+- `figures/fairness_by_Medu.csv`
+- `figures/fairness_by_schoolsup.csv`
+- `figures/fairness_by_famsup.csv`
+
+#### 5.2 Visualizations (`visualizations.py`)
+**Purpose:** Generate all research question figures programmatically.
+
+**RQ1 Figures (Multi-Source vs Single-Source):**
+- `plot_rq1_fig1_model_comparison()` - Performance comparison bar plot
+- `plot_rq1_fig2_grade_scatter()` - G1 vs G2 scatter plot by pass/fail
+- `plot_rq1_fig3_improvement()` - Improvement percentage comparison
+- `plot_rq1_fig4_studytime_boxplot()` - Grades by study time
+
+**RQ2 Figures (Parental Education & Support):**
+- `plot_rq2_fig1_parental_education()` - Mean grade by parental education
+- `plot_rq2_fig2_resilience_drivers()` - Key drivers for low education group
+- `plot_rq2_fig3_grade_improvement_trend()` - Education-location interaction
+- `plot_rq2_fig4_improvement_heatmap()` - Improvement probability heatmap
+- `plot_rq2_fig5_parental_ed_by_address()` - Education level by location trends
+
+**RQ3 Figures (Model Fairness):**
+- `plot_rq3_fig1_fairness_gap()` - F1-score gaps from baseline
+- `plot_rq3_fig2_subgroup_heatmap()` - Subgroup performance heatmap
+- `plot_rq3_fig3_subgroup_performance()` - Performance by demographics
+- `plot_rq3_fig4_fairness_metrics()` - Demographic parity & equal opportunity
+
+**RQ4 Figures (Feature Importance):**
+- `plot_rq4_fig1_feature_stability()` - Cross-validation feature stability
+- `plot_rq4_fig2_model_comparison()` - LR vs RF performance
+- `plot_rq4_fig3_confusion_matrices()` - Confusion matrices for both models
+- `plot_rq4_fig4_runtime_comparison()` - Training/prediction time comparison
+- `plot_rq4_fig5_feature_importance()` - Top predictive features bar plot
+- `plot_rq4_fig6_shap_importance()` - SHAP global feature importance analysis
+
+**Outputs:**
+- All 19 PDF figures in `figures/` directory (RQ1_Fig1.pdf through RQ4_Fig6.pdf)
+
 ## License
 
 This project is for educational purposes as part of the **WS25DE01 Data Engineering** course.
@@ -556,7 +556,7 @@ This project is for educational purposes as part of the **WS25DE01 Data Engineer
 
 For questions or issues about this project:
 - Open an issue in this repository
-- Contact: amrin.yanya@gmail.com
+- Contact: amrin.yanya@gmail.com, David.Joyson@gmail.com
 
 ## Acknowledgments
 
