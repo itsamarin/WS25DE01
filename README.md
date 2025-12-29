@@ -395,7 +395,6 @@ WS25DE01/
 │   └── linear_regression_model.pkl
 │
 ├── requirements.txt                        # Python dependencies
-├── .gitignore                              # Git ignore configuration
 └── README.md                               # This file
 ```
 
