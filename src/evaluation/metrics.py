@@ -133,27 +133,18 @@ def calculate_permutation_importance(
 
 def save_feature_importance(
     fi_df: pd.DataFrame,
-    full_path: str = "figures/feature_importance_rf_full.xlsx",
-    top_n: int = 15,
-    top_path: str = "figures/feature_importance_rf_top15.xlsx"
+    top_n: int = 15
 ) -> None:
     """
-    Save feature importance tables (full and top N).
+    Display feature importance (no longer saves to file).
 
     Args:
         fi_df: Feature importance DataFrame
-        full_path: Path to save full importance table (default: "figures/feature_importance_rf_full.xlsx")
-        top_n: Number of top features to save separately (default: 15)
-        top_path: Path to save top N features (default: "figures/feature_importance_rf_top15.xlsx")
+        top_n: Number of top features to display (default: 15)
     """
-    # Save full table
-    fi_df.to_excel(full_path, index=False)
-
-    # Save top N
+    # Display top N features
     fi_top = fi_df.head(top_n)
-    fi_top.to_excel(top_path, index=False)
 
-    print(f"Saved feature importance tables to {full_path} and {top_path}")
     print(f"\nTop {top_n} features:")
     print(fi_top)
 
@@ -201,18 +192,16 @@ def calculate_fairness_metrics(
     model: Pipeline,
     X_test: pd.DataFrame,
     y_test: pd.Series,
-    sensitive_attributes: List[str] = None,
-    save_dir: str = "figures"
+    sensitive_attributes: List[str] = None
 ) -> Dict[str, pd.DataFrame]:
     """
-    Calculate and save fairness metrics for sensitive attributes.
+    Calculate fairness metrics for sensitive attributes (display only, no file saving).
 
     Args:
         model: Trained model
         X_test: Test features
         y_test: Test target
         sensitive_attributes: List of sensitive attribute names (default: ["sex", "Medu", "schoolsup", "famsup"])
-        save_dir: Directory to save fairness tables (default: "figures")
 
     Returns:
         dict: Dictionary mapping attribute name to fairness DataFrame
@@ -231,12 +220,7 @@ def calculate_fairness_metrics(
             fair_df = subgroup_metrics(y_test, y_pred, X_test[attr], attr)
             fairness_results[attr] = fair_df
 
-            # Save to file
-            save_path = f"{save_dir}/fairness_by_{attr}.xlsx"
-            fair_df.to_excel(save_path, index=False)
-            print(f"Saved fairness metrics for '{attr}' to {save_path}")
-
-            # Display
+            # Display only
             print(f"\nFairness metrics for '{attr}':")
             print(fair_df)
 
@@ -320,7 +304,7 @@ def calculate_advanced_fairness_metrics(
     y_pred: pd.Series,
     subgroup_data: pd.DataFrame,
     sensitive_attributes: List[str] = None,
-    save_path: str = "figures/RQ3_Table1.xlsx"
+    save_path: str = "tables/RQ3_Table1.xlsx"
 ) -> pd.DataFrame:
     """
     Calculate advanced fairness metrics (demographic parity, equal opportunity).
@@ -330,7 +314,7 @@ def calculate_advanced_fairness_metrics(
         y_pred: Predicted labels
         subgroup_data: DataFrame with sensitive attributes and predictions
         sensitive_attributes: List of attributes to analyze (default: ["sex", "Medu"])
-        save_path: Path to save fairness table (default: "figures/RQ3_Table1.xlsx")
+        save_path: Path to save fairness table (default: "tables/RQ3_Table1.xlsx")
 
     Returns:
         pd.DataFrame: Fairness metrics table

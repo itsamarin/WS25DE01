@@ -94,15 +94,14 @@ airflow scheduler              # Terminal 2
 
 ## Reproducibility
 
-All figures (19 PDFs) and tables (XLSX) are programmatically generated:
+All figures (19 PDFs) and tables (2 XLSX) are programmatically generated:
 - **Figures:** [src/evaluation/visualizations.py](src/evaluation/visualizations.py) (matplotlib/seaborn/SHAP)
 - **Tables:** [src/evaluation/metrics.py](src/evaluation/metrics.py) (pandas)
 
 **Regenerate all outputs:**
 ```bash
 rm -rf figures/*.pdf tables/*.xlsx
-python -m src.evaluation.metrics
-python -m src.evaluation.visualizations
+python3 run_simple_analysis.py
 ```
 
 ## Folder Structure Explanation

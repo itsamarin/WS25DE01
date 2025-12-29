@@ -5,3 +5,8 @@ models/*.pt
 models/*.pth
 models/*.joblib
 models/*.model
+
+# Keep only essential tables
+tables/*
+!tables/RQ1_Table1.xlsx
+!tables/RQ3_Table1.xlsx
