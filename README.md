@@ -23,13 +23,13 @@ End-to-end ML pipeline predicting student performance using multi-source data fu
 
 ## Research Questions
 
-**RQ1:** Does multi-source data (demographic + behavioral + academic) outperform academic-only features (G1, G2)?
+**RQ1:** Can integrating multiple data sources (academic, behavioral, demographic, LMS) improve the predictive accuracy of academic performance compared to single-source models? 
 
 **RQ2:** How do parental education and family support impact student outcomes?
 
-**RQ3:** Are models fair across demographic subgroups (gender, parental education, support)?
+**RQ3:** How fair is the prediction model across student demographic subgroups (gender, parental education, and support level)?
 
-**RQ4:** Which features most influence student success? (permutation importance + SHAP)
+**RQ4:** Which features (attendance, demographics, study habits) most strongly predict final academic performance? 
 
 ## Installation
 
