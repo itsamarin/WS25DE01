@@ -82,7 +82,7 @@ python3 src/run_simple_analysis.py   # Step 2: Generate all figures and tables
 
 ## How to Run (Detailed Options)
 
-### Option 1: Standalone Pipeline (Recommended)
+### Option 1: Standalone Pipeline (Easiest)
 ```bash
 python main.py  # Run complete pipeline without Airflow
 ```
