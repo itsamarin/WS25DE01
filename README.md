@@ -65,20 +65,11 @@ python3 src/run_simple_analysis.py   # Step 2: Generate all figures and tables
 
 **What you get:**
 - 19 PDF figures in `figures/` (RQ1-RQ4 visualizations)
-- 2 XLSX tables in `tables/` (performance & fairness metrics)
+- 2 XLSX tables in `tables/` (RQ1_Table1.xlsx, RQ3_Table1.xlsx)
 - Trained models in `src/modeling/models/`
 - Processed datasets in `data/`
 
 **Estimated runtime:** ~2-3 minutes (depending on hardware)
-
----
-
-**Optional: SHAP Visualization**
-
-Replace RQ4_Fig6 with SHAP-based feature importance (instead of default permutation importance):
-```bash
-./generate_shap_with_py312.sh
-```
 
 ---
 
