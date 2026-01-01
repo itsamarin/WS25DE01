@@ -382,7 +382,7 @@ if __name__ == "__main__":
     )
 
     # Save best model
-    save_model(multi_models["random_forest"], "models/rf_pass_prediction.pkl")
+    save_model(multi_models["random_forest"], "src/modeling/models/rf_pass_prediction.pkl")
 
     print("\n" + "="*60)
     print("TRAINING REGRESSION MODEL")
@@ -396,7 +396,7 @@ if __name__ == "__main__":
     reg_model = train_regression_model(X_reg_train, X_reg_test, y_reg_train, y_reg_test)
 
     # Save regression model
-    save_model(reg_model, "models/linear_regression_model.pkl")
+    save_model(reg_model, "src/modeling/models/linear_regression_model.pkl")
 
     print("\n" + "="*60)
     print("MODEL TRAINING COMPLETED")

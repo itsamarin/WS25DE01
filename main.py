@@ -105,9 +105,9 @@ def main():
 
         # Save models
         print("\n  Saving models...")
-        os.makedirs("models", exist_ok=True)
-        save_model(multi_models["random_forest"], "models/rf_pass_prediction.pkl")
-        save_model(reg_model, "models/linear_regression_model.pkl")
+        os.makedirs("src/modeling/models", exist_ok=True)
+        save_model(multi_models["random_forest"], "src/modeling/models/rf_pass_prediction.pkl")
+        save_model(reg_model, "src/modeling/models/linear_regression_model.pkl")
 
         print("✓ Model training completed")
 
@@ -128,7 +128,7 @@ def main():
         from src.modeling.train import load_model
 
         # Load the best model
-        rf_model = load_model('models/rf_pass_prediction.pkl')
+        rf_model = load_model('src/modeling/models/rf_pass_prediction.pkl')
 
         # Calculate feature importance
         print("  Calculating permutation importance...")
@@ -153,8 +153,8 @@ def main():
     print("="*70)
     print("\nOutputs:")
     print("  - data/processed/abt_student_performance.csv")
-    print("  - models/rf_pass_prediction.pkl")
-    print("  - models/linear_regression_model.pkl")
+    print("  - src/modeling/models/rf_pass_prediction.pkl")
+    print("  - src/modeling/models/linear_regression_model.pkl")
     print("  - figures/model_comparison.csv")
     print("  - figures/feature_importance_rf_full.csv")
     print("  - figures/fairness_by_*.csv")

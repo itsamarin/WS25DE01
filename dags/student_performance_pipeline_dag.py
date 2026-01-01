@@ -136,8 +136,8 @@ def task_model_training(**context):
     Inputs:
         - data/processed/abt_student_performance.csv
     Outputs:
-        - models/rf_pass_prediction.pkl
-        - models/linear_regression_model.pkl
+        - src/modeling/models/rf_pass_prediction.pkl
+        - src/modeling/models/linear_regression_model.pkl
     """
     from src.modeling.train import (
         load_abt, prepare_data, split_data,
@@ -178,7 +178,7 @@ def task_model_evaluation(**context):
     Evaluates model performance, calculates feature importance, and analyzes fairness.
 
     Inputs:
-        - models/rf_pass_prediction.pkl
+        - src/modeling/models/rf_pass_prediction.pkl
         - data/processed/abt_student_performance.csv
     Outputs:
         - figures/model_comparison.csv
@@ -204,7 +204,7 @@ def task_model_evaluation(**context):
     X, y = prepare_data(abt)
     X_train, X_test, y_train, y_test = split_data(X, y)
 
-    rf_model = load_model('models/rf_pass_prediction.pkl')
+    rf_model = load_model('src/modeling/models/rf_pass_prediction.pkl')
 
     # Calculate permutation importance
     print("Calculating feature importance...")

@@ -49,7 +49,12 @@ chmod 600 ~/.kaggle/kaggle.json
 
 ## How to Run
 
-### Option 1: Individual Modules
+### Option 1: Standalone Pipeline (Recommended)
+```bash
+python main.py  # Run complete pipeline without Airflow
+```
+
+### Option 2: Individual Modules
 ```bash
 python -m src.data_ingestion.loader        # Download data
 python -m src.data_cleaning.cleaner        # Clean data
@@ -58,7 +63,7 @@ python -m src.modeling.train               # Train models
 python -m src.evaluation.metrics           # Evaluate
 ```
 
-### Option 2: Airflow DAG (Recommended)
+### Option 3: Airflow DAG
 See [Airflow Setup](#how-to-run-the-airflow-dag) below for automated orchestration.
 
 ## How to Run the Airflow DAG
@@ -128,7 +133,10 @@ WS25DE01/
 │   ├── modeling/                           # Model training and pipelines
 │   │   ├── __init__.py
 │   │   ├── preprocessing.py                # Preprocessing transformers
-│   │   └── train.py                        # Model training (RF, LR, Linear Regression)
+│   │   ├── train.py                        # Model training (RF, LR, Linear Regression)
+│   │   └── models/                         # Saved trained models
+│   │       ├── rf_pass_prediction.pkl
+│   │       └── linear_regression_model.pkl
 │   │
 │   └── evaluation/                         # Model evaluation and fairness
 │       ├── __init__.py
@@ -148,13 +156,10 @@ WS25DE01/
 │   ├── RQ1_Table1.xlsx                     # Model performance metrics
 │   └── RQ3_Table1.xlsx                     # Fairness metrics
 │
+├── main.py                                 # Standalone pipeline runner (no Airflow)
 ├── requirements.txt                        # Python dependencies
 ├── .gitignore                              # Git ignore configuration
-├── README.md                               # This file
-│
-└── models/                                 # Saved trained models
-    ├── rf_pass_prediction.pkl
-    └── linear_regression_model.pkl
+└── README.md                               # This file
 ```
 
 ## Pipeline Stages
@@ -171,7 +176,7 @@ Creates derived features (avg_prev_grade, grade_trend, high_absence, target_pass
 ### 4. Modeling
 **Preprocessing:** StandardScaler + OneHotEncoder
 **Models:** Multi-source (all features) vs Single-source (G1, G2 only) - Random Forest, Logistic Regression, Linear Regression
-**Output:** `models/*.pkl`
+**Output:** `src/modeling/models/*.pkl`
 
 ### 5. Evaluation
 **Metrics:** Accuracy, precision, recall, F1, permutation importance
