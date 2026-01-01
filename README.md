@@ -64,10 +64,10 @@ python3 src/run_simple_analysis.py   # Step 2: Generate all figures and tables
 ```
 
 **What you get:**
-- ✅ 19 PDF figures in `figures/` (RQ1-RQ4 visualizations)
-- ✅ 2 XLSX tables in `tables/` (performance & fairness metrics)
-- ✅ Trained models in `src/modeling/models/`
-- ✅ Processed datasets in `data/`
+- 19 PDF figures in `figures/` (RQ1-RQ4 visualizations)
+- 2 XLSX tables in `tables/` (performance & fairness metrics)
+- Trained models in `src/modeling/models/`
+- Processed datasets in `data/`
 
 **Estimated runtime:** ~2-3 minutes (depending on hardware)
 
