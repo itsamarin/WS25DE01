@@ -17,7 +17,7 @@ from sklearn.metrics import (
 )
 from typing import Tuple, Dict, Any
 
-from .preprocessing import (
+from src.modeling.preprocessing import (
     get_numeric_categorical_features,
     create_multi_source_preprocessor,
     create_academic_only_preprocessor,
