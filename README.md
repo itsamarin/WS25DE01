@@ -95,13 +95,16 @@ airflow scheduler              # Terminal 2
 
 **Models:** Random Forest (n_estimators=300), Logistic Regression (max_iter=1000), Linear Regression
 **Split:** 80/20 train-test, stratified, random_state=42
-**Feature Importance:** Permutation (n_repeats=5, sample_size=300)
+**Feature Importance:** Permutation importance (n_repeats=10) with confidence intervals for robust feature ranking
+
+> **Note:** SHAP (SHapley Additive exPlanations) code is available in `src/evaluation/visualizations.py` but currently has dependency compatibility issues with Python 3.14. Permutation importance provides equivalent global feature importance insights with better stability.
 
 ## Reproducibility
 
 All figures (19 PDFs) and tables (2 XLSX) are programmatically generated:
-- **Figures:** [src/evaluation/visualizations.py](src/evaluation/visualizations.py) (matplotlib/seaborn/SHAP)
+- **Figures:** [src/evaluation/visualizations.py](src/evaluation/visualizations.py) (matplotlib/seaborn)
 - **Tables:** [src/evaluation/metrics.py](src/evaluation/metrics.py) (pandas)
+- **Feature Importance:** Permutation importance with confidence intervals (10 repeats)
 
 **Regenerate all outputs:**
 ```bash
@@ -181,7 +184,8 @@ Creates derived features (avg_prev_grade, grade_trend, high_absence, target_pass
 ### 5. Evaluation
 **Metrics:** Accuracy, precision, recall, F1, permutation importance
 **Fairness:** Demographic parity & equal opportunity across sex, Medu, schoolsup, famsup
-**Visualizations:** 19 figures (RQ1-RQ4) using matplotlib/seaborn/SHAP
+**Visualizations:** 19 figures (RQ1-RQ4) using matplotlib/seaborn
+**Feature Importance:** Permutation importance with uncertainty quantification
 **Output:** `figures/*.pdf`, `tables/*.xlsx`
 
 ## License & Contact

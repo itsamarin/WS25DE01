@@ -67,7 +67,7 @@ def main():
     ax2.invert_yaxis()
 
     # Main title
-    fig.suptitle('RQ4_Fig6: Comprehensive Feature Importance Analysis for Academic Performance (Random Forest)',
+    fig.suptitle('RQ4_Fig6: Permutation Feature Importance Analysis for Academic Performance (Random Forest)',
                  fontsize=16, fontweight='bold', y=0.98)
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
@@ -77,10 +77,17 @@ def main():
     plt.savefig(save_path, format='pdf', dpi=300, bbox_inches='tight')
     plt.close()
 
-    print(f"\n✓ Enhanced visualization saved to: {save_path}")
+    print(f"\n✓ Permutation importance visualization saved to: {save_path}")
     print("="*70)
     print("COMPLETE!")
     print("="*70)
+
+    # Print caption
+    print("\n📊 Figure Caption:")
+    print("Permutation feature importance showing the top 20 most influential features")
+    print("with confidence intervals (10 permutation repeats). Left panel shows mean")
+    print("importance with error bars; right panel displays uncertainty quantification.")
+    print("Higher values indicate greater feature impact on model predictions.")
 
     # Print top 5 features
     print("\nTop 5 Most Important Features:")
