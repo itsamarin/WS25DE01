@@ -25,6 +25,9 @@ echo ""
 echo "================================================================================"
 echo ""
 
+# Ensure output directories exist
+mkdir -p figures tables
+
 # Step 1: Run the main pipeline
 echo "[STEP 1/3] Running main pipeline (data ingestion, cleaning, training)..."
 echo "--------------------------------------------------------------------------------"

@@ -11,6 +11,7 @@ Usage:
 import sys
 sys.path.insert(0, '.')
 
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,6 +19,10 @@ import seaborn as sns
 from sklearn.metrics import confusion_matrix
 from src.modeling.train import load_model, load_abt, prepare_data, split_data, train_multi_source_models, train_academic_only_models
 from src.evaluation.metrics import calculate_permutation_importance
+
+# Create necessary directories
+os.makedirs('figures', exist_ok=True)
+os.makedirs('tables', exist_ok=True)
 
 # Set style
 sns.set_palette("husl")
