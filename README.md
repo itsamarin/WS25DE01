@@ -64,7 +64,7 @@ python3 src/run_simple_analysis.py   # Step 2: Generate all figures and tables
 ```
 
 **What you get:**
-- 19 PDF figures in `figures/` (RQ1-RQ4 visualizations)
+- 19 PDF figures in `figures/` (RQ1: 4 figs, RQ2: 5 figs, RQ3: 4 figs, RQ4: 6 figs)
 - 2 XLSX tables in `tables/` (RQ1_Table1.xlsx, RQ3_Table1.xlsx)
 - Trained models in `src/modeling/models/`
 - Processed datasets in `data/`
