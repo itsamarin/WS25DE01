@@ -6,6 +6,7 @@ End-to-end ML pipeline predicting student performance using multi-source data fu
 
 **Key Features:**
 - Multi-source data fusion with Random Forest, Logistic Regression, Linear Regression
+- SHAP (SHapley Additive exPlanations) for model interpretability
 - Fairness analysis across demographic subgroups
 - Automated Airflow orchestration
 - Programmatic figure and table generation
@@ -38,7 +39,7 @@ End-to-end ML pipeline predicting student performance using multi-source data fu
 ```bash
 # 1. Clone and install dependencies
 git clone <repository-url>
-cd amarin-project
+cd WS25DE01
 pip install -r requirements.txt
 
 # 2. Set up Kaggle API (required for data download)
@@ -47,7 +48,41 @@ pip install -r requirements.txt
 chmod 600 ~/.kaggle/kaggle.json
 ```
 
-## How to Run
+## Quick Start - Complete Workflow
+
+**Fastest way to run the entire project and generate all outputs (19 figures + 2 tables):**
+
+```bash
+# One-liner: Complete end-to-end workflow
+python3 main.py && python3 src/run_simple_analysis.py
+```
+
+Or run step-by-step:
+```bash
+python3 main.py                      # Step 1: Run pipeline (download, clean, train, evaluate)
+python3 src/run_simple_analysis.py   # Step 2: Generate all figures and tables
+```
+
+**What you get:**
+- ✅ 19 PDF figures in `figures/` (RQ1-RQ4 visualizations)
+- ✅ 2 XLSX tables in `tables/` (performance & fairness metrics)
+- ✅ Trained models in `src/modeling/models/`
+- ✅ Processed datasets in `data/`
+
+**Estimated runtime:** ~2-3 minutes (depending on hardware)
+
+---
+
+**Optional: SHAP Visualization**
+
+Replace RQ4_Fig6 with SHAP-based feature importance (instead of default permutation importance):
+```bash
+./generate_shap_with_py312.sh
+```
+
+---
+
+## How to Run (Detailed Options)
 
 ### Option 1: Standalone Pipeline (Recommended)
 ```bash
@@ -95,9 +130,34 @@ airflow scheduler              # Terminal 2
 
 **Models:** Random Forest (n_estimators=300), Logistic Regression (max_iter=1000), Linear Regression
 **Split:** 80/20 train-test, stratified, random_state=42
-**Feature Importance:** Permutation importance (n_repeats=10) with confidence intervals for robust feature ranking
+**Feature Importance:**
+- SHAP (SHapley Additive exPlanations) for interpretable AI explanations
+- Permutation importance (n_repeats=10) with confidence intervals for robust feature ranking
 
-> **Note:** SHAP (SHapley Additive exPlanations) code is available in `src/evaluation/visualizations.py` but currently has dependency compatibility issues with Python 3.14. Permutation importance provides equivalent global feature importance insights with better stability.
+> **Note on SHAP:** SHAP visualizations are supported through a dedicated Python 3.12 virtual environment at [src/.venv_py312_shap](src/.venv_py312_shap) to resolve dependency compatibility issues with newer Python versions. Use [generate_shap_with_py312.sh](generate_shap_with_py312.sh) to generate SHAP-based RQ4_Fig6. The default pipeline uses permutation importance which provides stable global feature importance insights.
+
+## SHAP Integration for Model Interpretability
+
+This project includes SHAP (SHapley Additive exPlanations) support for advanced model interpretability. Due to dependency compatibility issues between SHAP and Python 3.14+, we maintain a separate Python 3.12 virtual environment specifically for SHAP visualizations.
+
+### Using SHAP
+
+**Quick Start:**
+```bash
+# Generate SHAP-based RQ4_Fig6 visualization
+./generate_shap_with_py312.sh
+```
+
+**Available SHAP Scripts:**
+- [src/generate_shap_fig6.py](src/generate_shap_fig6.py) - Main SHAP visualization (recommended)
+- [src/generate_shap_figure.py](src/generate_shap_figure.py) - Alternative SHAP generator
+- [src/generate_shap_kernel.py](src/generate_shap_kernel.py) - SHAP KernelExplainer version
+
+**Environment:**
+- Python 3.12 virtual environment: [src/.venv_py312_shap](src/.venv_py312_shap)
+- Isolated from main project dependencies to avoid conflicts
+
+**Note:** The default analysis pipeline ([src/run_simple_analysis.py](src/run_simple_analysis.py)) uses permutation importance for RQ4_Fig6, which is more stable and provides similar insights without dependency constraints.
 
 ## Reproducibility
 
@@ -105,11 +165,16 @@ All figures (19 PDFs) and tables (2 XLSX) are programmatically generated:
 - **Figures:** [src/evaluation/visualizations.py](src/evaluation/visualizations.py) (matplotlib/seaborn)
 - **Tables:** [src/evaluation/metrics.py](src/evaluation/metrics.py) (pandas)
 - **Feature Importance:** Permutation importance with confidence intervals (10 repeats)
+- **SHAP Analysis:** [src/generate_shap_fig6.py](src/generate_shap_fig6.py) for interpretable AI feature explanations
 
 **Regenerate all outputs:**
 ```bash
+# Standard pipeline (uses permutation importance for RQ4_Fig6)
 rm -rf figures/*.pdf tables/*.xlsx
-python3 run_simple_analysis.py
+python3 src/run_simple_analysis.py
+
+# Alternative: Generate SHAP-based RQ4_Fig6 (requires Python 3.12 venv)
+./generate_shap_with_py312.sh
 ```
 
 ## Folder Structure Explanation
@@ -141,10 +206,17 @@ WS25DE01/
 │   │       ├── rf_pass_prediction.pkl
 │   │       └── linear_regression_model.pkl
 │   │
-│   └── evaluation/                         # Model evaluation and fairness
-│       ├── __init__.py
-│       ├── metrics.py                      # Performance metrics, feature importance, fairness
-│       └── visualizations.py               # All RQ figure generation code (RQ1-RQ4)
+│   ├── evaluation/                         # Model evaluation and fairness
+│   │   ├── __init__.py
+│   │   ├── metrics.py                      # Performance metrics, feature importance, fairness
+│   │   └── visualizations.py               # All RQ figure generation code (RQ1-RQ4)
+│   │
+│   ├── .venv_py312_shap/                   # Python 3.12 virtual environment for SHAP
+│   ├── generate_shap_fig6.py               # SHAP-based RQ4_Fig6 generator
+│   ├── generate_shap_figure.py             # Alternative SHAP generator
+│   ├── generate_shap_kernel.py             # SHAP KernelExplainer version
+│   ├── generate_enhanced_fig6.py           # Enhanced permutation importance fallback
+│   └── run_simple_analysis.py              # Main script to generate all figures/tables
 │
 ├── data/                                   # Data storage (NO large raw datasets in Git)
 │   └── sample/                             # Sample data files only
@@ -160,6 +232,7 @@ WS25DE01/
 │   └── RQ3_Table1.xlsx                     # Fairness metrics
 │
 ├── main.py                                 # Standalone pipeline runner (no Airflow)
+├── generate_shap_with_py312.sh             # Shell script to generate SHAP with Python 3.12
 ├── requirements.txt                        # Python dependencies
 ├── .gitignore                              # Git ignore configuration
 └── README.md                               # This file
@@ -185,7 +258,9 @@ Creates derived features (avg_prev_grade, grade_trend, high_absence, target_pass
 **Metrics:** Accuracy, precision, recall, F1, permutation importance
 **Fairness:** Demographic parity & equal opportunity across sex, Medu, schoolsup, famsup
 **Visualizations:** 19 figures (RQ1-RQ4) using matplotlib/seaborn
-**Feature Importance:** Permutation importance with uncertainty quantification
+**Feature Importance:**
+- SHAP (SHapley Additive exPlanations) for model interpretability
+- Permutation importance with uncertainty quantification (default)
 **Output:** `figures/*.pdf`, `tables/*.xlsx`
 
 ## License & Contact
