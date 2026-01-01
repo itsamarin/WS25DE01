@@ -53,10 +53,10 @@ chmod 600 ~/.kaggle/kaggle.json
 **Fastest way to run the entire project and generate all outputs (19 figures + 2 tables):**
 
 ```bash
-# Option 1: Use convenience script (recommended)
+# Option 1: Use convenience script (recommended - includes SHAP)
 ./run_all.sh
 
-# Option 2: One-liner command
+# Option 2: One-liner command (without SHAP)
 python3 main.py && python3 src/run_simple_analysis.py
 ```
 
@@ -129,15 +129,17 @@ airflow scheduler              # Terminal 2
 - SHAP (SHapley Additive exPlanations) for interpretable AI explanations
 - Permutation importance (n_repeats=10) with confidence intervals for robust feature ranking
 
-> **Note on SHAP:** SHAP visualizations are supported through a dedicated Python 3.12 virtual environment at [src/.venv_py312_shap](src/.venv_py312_shap) to resolve dependency compatibility issues with newer Python versions. Use [generate_shap_with_py312.sh](generate_shap_with_py312.sh) to generate SHAP-based RQ4_Fig6. The default pipeline uses permutation importance which provides stable global feature importance insights.
+> **Note on SHAP:** SHAP visualizations are automatically generated when using [run_all.sh](run_all.sh). SHAP requires a dedicated Python 3.12 virtual environment at [src/.venv_py312_shap](src/.venv_py312_shap) to resolve dependency compatibility issues. You can also run SHAP separately using [generate_shap_with_py312.sh](generate_shap_with_py312.sh).
 
 ## SHAP Integration for Model Interpretability
 
 This project includes SHAP (SHapley Additive exPlanations) support for advanced model interpretability. Due to dependency compatibility issues between SHAP and Python 3.14+, we maintain a separate Python 3.12 virtual environment specifically for SHAP visualizations.
 
-### Using SHAP
+**SHAP is automatically included when using `./run_all.sh`** - no additional steps needed!
 
-**Quick Start:**
+### Manual SHAP Generation
+
+If you need to regenerate only the SHAP visualization:
 ```bash
 # Generate SHAP-based RQ4_Fig6 visualization
 ./generate_shap_with_py312.sh
@@ -152,7 +154,7 @@ This project includes SHAP (SHapley Additive exPlanations) support for advanced 
 - Python 3.12 virtual environment: [src/.venv_py312_shap](src/.venv_py312_shap)
 - Isolated from main project dependencies to avoid conflicts
 
-**Note:** The default analysis pipeline ([src/run_simple_analysis.py](src/run_simple_analysis.py)) uses permutation importance for RQ4_Fig6, which is more stable and provides similar insights without dependency constraints.
+**Note:** When running [src/run_simple_analysis.py](src/run_simple_analysis.py) standalone, RQ4_Fig6 uses permutation importance. The [run_all.sh](run_all.sh) script automatically replaces this with the SHAP beeswarm plot in Step 3.
 
 ## Reproducibility
 
