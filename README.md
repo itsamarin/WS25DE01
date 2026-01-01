@@ -96,16 +96,21 @@ python -m src.modeling.train               # Train models
 python -m src.evaluation.metrics           # Evaluate
 ```
 
-### Option 3: Airflow DAG
+### Option 3: Airflow DAG (Advanced - Python 3.12 or earlier required)
 See [Airflow Setup](#how-to-run-the-airflow-dag) below for automated orchestration.
+
+**Note:** Airflow DAG requires Python 3.12 or earlier due to compatibility issues with Airflow 2.x and Python 3.14+. For simplest execution, use Option 1 or the convenience script `./run_all.sh`.
 
 ## How to Run the Airflow DAG
 
 ### Setup
+
+**Prerequisites:** Python 3.12 or earlier, Airflow 2.x
+
 ```bash
 # 1. Initialize Airflow (first time only)
 export AIRFLOW_HOME=$(pwd)/airflow
-airflow db init
+airflow db migrate  # Updated command for Airflow 2.x (use 'init' for older versions)
 airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com
 
 # 2. Link DAG file

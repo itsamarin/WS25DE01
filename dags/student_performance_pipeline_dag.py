@@ -35,7 +35,7 @@ dag = DAG(
     'student_performance_prediction_pipeline',
     default_args=default_args,
     description='End-to-end pipeline for student performance prediction using multi-source data fusion',
-    schedule_interval=None,  # Manual trigger only
+    schedule=None,  # Manual trigger only
     catchup=False,
     tags=['student-performance', 'machine-learning', 'data-fusion'],
 )
