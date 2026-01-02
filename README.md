@@ -110,206 +110,75 @@ python3 src/run_simple_analysis.py          # Step 6: Generate all 19 figures an
 
 **When to use:** Fine-grained control over each pipeline stage, debugging, or learning the workflow.
 
-### Option 3: Airflow DAG (Advanced - Python 3.12 or earlier required)
-See [Airflow Setup](#how-to-run-the-airflow-dag) below for automated orchestration.
+### Option 3: Airflow DAG (Advanced)
 
-**Prerequisites:** Python 3.12 or earlier (Airflow 2.x incompatible with Python 3.14+)
+**Prerequisites:** Python 3.12 or earlier (Airflow 2.x limitation), Airflow 2.x, PostgreSQL 12+ (optional)
 
-**When to use:** Production workflows, scheduling, monitoring, or integration with existing Airflow infrastructure.
+**When to use:** Production workflows, scheduling, monitoring, or data warehouse integration
 
-**Important:** The DAG is fully configured with all 9 tasks including PostgreSQL loading, figure generation, and SHAP. It will produce identical outputs to Options 1 & 2 when run with Python 3.12 or earlier. For Python 3.14+ users, use Option 1 or Option 2 instead.
-
-## How to Run the Airflow DAG
-
-### Setup
-
-**Prerequisites:** Python 3.12 or earlier, Airflow 2.x, PostgreSQL 12+
+**Setup Steps:**
 
 ```bash
-# 1. Set up PostgreSQL (if using PostgreSQL integration)
-# Option A: Using Docker
-docker run --name postgres-student -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=student_performance -p 5432:5432 -d postgres:15
+# Step 1: Setup PostgreSQL (optional - for data warehouse integration)
+docker run --name postgres-student -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=student_performance -p 5432:5432 -d postgres:15
 
-# Option B: Using local PostgreSQL
-createdb student_performance
-
-# Configure PostgreSQL connection (optional - uses defaults if not set)
-export POSTGRES_HOST=localhost
-export POSTGRES_PORT=5432
-export POSTGRES_DB=student_performance
-export POSTGRES_USER=postgres
-export POSTGRES_PASSWORD=postgres
-
-# 2. Initialize Airflow (first time only)
+# Step 2: Initialize Airflow (first-time only)
 export AIRFLOW_HOME=$(pwd)/airflow
-airflow db migrate  # Updated command for Airflow 2.x (use 'init' for older versions)
-airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com
+airflow db migrate
+airflow users create --username admin --password admin \
+  --firstname Admin --lastname User --role Admin --email admin@example.com
 
-# 3. Link DAG file
+# Step 3: Link DAG file
 mkdir -p $AIRFLOW_HOME/dags
 ln -s $(pwd)/dags/student_performance_pipeline_dag.py $AIRFLOW_HOME/dags/
 
-# 4. Start Airflow (two terminals)
-airflow webserver --port 8080  # Terminal 1
-airflow scheduler              # Terminal 2
+# Step 4: Start Airflow (requires 2 terminals)
+# Terminal 1:
+airflow webserver --port 8080
+
+# Terminal 2:
+airflow scheduler
+
+# Step 5: Run the DAG
+# Option A - Web UI: Open http://localhost:8080 → Toggle DAG ON → Click "Trigger DAG"
+# Option B - CLI: airflow dags trigger student_performance_prediction_pipeline
 ```
 
-### Run
-- **UI:** Open `http://localhost:8080` → Toggle DAG ON → Click Trigger
-- **CLI:** `airflow dags trigger student_performance_prediction_pipeline`
+**What it does:**
+- Executes all pipeline stages as Airflow tasks
+- Loads data to PostgreSQL in parallel (optional data warehouse integration)
+- Provides web UI for monitoring and scheduling
+- Enables production-ready workflow orchestration
 
-### DAG Tasks (Parallel Execution)
+**DAG Structure (9 tasks):**
+- **Main Pipeline:** data_ingestion → data_cleaning → feature_engineering → model_training → model_evaluation → generate_figures → generate_shap → completion
+- **Parallel Branch:** feature_engineering → load_to_postgres (data warehouse, runs independently)
 
-**Main Pipeline (uses CSV files):**
-1. data_ingestion → 2. data_cleaning → 3. feature_engineering → 4. model_training → 5. model_evaluation → 6. generate_figures → 7. generate_shap → 8. pipeline_completion
+**Outputs:** Same as Options 1 & 2 (19 figures, 2 tables, 2 models) + PostgreSQL tables (if configured)
 
-**Parallel Branch (data warehouse):**
-3. feature_engineering → 3.5. load_to_postgres
+**Note:** Python 3.14+ users should use Option 1 or 2 instead due to Airflow 2.x compatibility.
 
-The PostgreSQL loading runs independently as a parallel branch after feature engineering. This allows data to be ingested into the database for BI tools and reporting without blocking the ML pipeline, which continues using CSV files.
+---
 
-**Outputs:**
-- PostgreSQL tables: `student_performance_cleaned`, `student_performance_abt` (parallel branch)
-- 19 PDF figures + 2 XLSX tables + 2 trained models (same as Options 1 & 2)
-
-### PostgreSQL Database Integration
-
-The Airflow DAG includes PostgreSQL integration as a parallel branch for data warehouse functionality. This allows the ML pipeline to continue using CSV files while simultaneously loading data to PostgreSQL for BI tools, reporting, and data warehouse integration.
-
-#### Database Schema
-
-**Tables Created:**
-1. `student_performance_cleaned` - Cleaned student data (1,048 rows, 34 columns)
-2. `student_performance_abt` - Analytical Base Table with engineered features (1,048 rows, 38 columns)
-
-**Key Features:**
-- Automatic table creation with proper data types
-- Indexes on frequently queried columns (course, target_pass, G3)
-- Timestamp tracking (`created_at` column)
-- Support for both Docker and local PostgreSQL installations
-
-#### Standalone PostgreSQL Loading
-
-You can also load data to PostgreSQL independently of Airflow:
-
-```bash
-# Ensure PostgreSQL is running and configured
-export POSTGRES_HOST=localhost
-export POSTGRES_DB=student_performance
-export POSTGRES_USER=postgres
-export POSTGRES_PASSWORD=postgres
-
-# Load data to PostgreSQL
-python3 -m src.data_ingestion.postgres_loader
-```
-
-This loads both cleaned data and ABT tables.
-
-#### Querying the Data
-
-```sql
--- Connect to database
-psql -U postgres -d student_performance
-
--- View total students and pass rate
-SELECT
-    COUNT(*) as total_students,
-    SUM(CASE WHEN target_pass = 1 THEN 1 ELSE 0 END) as passed,
-    AVG(G3) as avg_final_grade
-FROM student_performance_abt;
-
--- View performance by course
-SELECT
-    course,
-    COUNT(*) as students,
-    AVG(G3) as avg_grade,
-    SUM(CASE WHEN target_pass = 1 THEN 1 ELSE 0 END)::FLOAT / COUNT(*) as pass_rate
-FROM student_performance_abt
-GROUP BY course;
-```
+## Additional Information
 
 ### Model Configuration
+- **Models:** Random Forest (n_estimators=300), Logistic Regression, Linear Regression
+- **Split:** 80/20 train-test, stratified, random_state=42
+- **Feature Importance:** SHAP (Python 3.12 venv) + Permutation importance
 
-**Models:** Random Forest (n_estimators=300), Logistic Regression (max_iter=1000), Linear Regression
-**Split:** 80/20 train-test, stratified, random_state=42
-**Feature Importance:**
-- SHAP (SHapley Additive exPlanations) for interpretable AI explanations
-- Permutation importance (n_repeats=10) with confidence intervals for robust feature ranking
-
-> **Note on SHAP:** SHAP visualizations are automatically generated when using [run_all.sh](run_all.sh). SHAP requires a dedicated Python 3.12 virtual environment at [src/.venv_py312_shap](src/.venv_py312_shap) to resolve dependency compatibility issues. You can also run SHAP separately using [src/generate_shap_with_py312.sh](src/generate_shap_with_py312.sh).
-
-### SHAP Integration for Model Interpretability
-
-This project includes SHAP (SHapley Additive exPlanations) support for advanced model interpretability. Due to dependency compatibility issues between SHAP and Python 3.14+, we maintain a separate Python 3.12 virtual environment specifically for SHAP visualizations.
-
-#### First-Time Setup
-
-**Before running SHAP visualizations, set up the Python 3.12 environment (one-time only):**
-
+### SHAP Setup (One-Time)
 ```bash
-./src/setup_shap_env.sh
+./src/setup_shap_env.sh  # Creates Python 3.12 venv for SHAP
 ```
+Run this once before using `./run_all.sh`. If Python 3.12 unavailable, RQ4_Fig6 uses permutation importance.
 
-This script will:
-1. Check if Python 3.12 is installed
-2. Create a virtual environment at `src/.venv_py312_shap/`
-3. Install SHAP and required dependencies
-
-**If Python 3.12 is not installed:**
-- macOS: `brew install python@3.12`
-- Ubuntu/Debian: `sudo apt install python3.12 python3.12-venv`
-- Or download from: https://www.python.org/downloads/
-
-After setup, **SHAP is automatically included when using `./run_all.sh`** - no additional steps needed!
-
-#### Manual SHAP Generation
-
-If you need to regenerate only the SHAP visualization:
+### PostgreSQL (Optional)
+Airflow DAG loads data to PostgreSQL as parallel branch. Tables: `student_performance_cleaned`, `student_performance_abt`
 ```bash
-# Generate SHAP-based RQ4_Fig6 visualization
-./src/generate_shap_with_py312.sh
-```
-
-**SHAP Scripts:**
-- [src/generate_shap_fig6.py](src/generate_shap_fig6.py) - SHAP beeswarm visualization
-- [src/generate_shap_with_py312.sh](src/generate_shap_with_py312.sh) - Shell wrapper for Python 3.12 venv
-- [src/setup_shap_env.sh](src/setup_shap_env.sh) - Setup script for Python 3.12 environment
-- [src/generate_enhanced_fig6.py](src/generate_enhanced_fig6.py) - Permutation importance fallback
-
-**Environment:**
-- Python 3.12 virtual environment: [src/.venv_py312_shap](src/.venv_py312_shap)
-- Isolated from main project dependencies to avoid conflicts
-- **Note:** The virtual environment is excluded from Git (see `.gitignore`)
-
-**Fallback:** When running [src/run_simple_analysis.py](src/run_simple_analysis.py) standalone, RQ4_Fig6 uses permutation importance. The [run_all.sh](run_all.sh) script automatically replaces this with the SHAP beeswarm plot in Step 3 (if the Python 3.12 environment is set up).
-
-### Reproducibility
-
-All 19 figures and 2 tables are programmatically generated by [src/run_simple_analysis.py](src/run_simple_analysis.py):
-
-**Figure Generation:**
-- RQ1 (4 figures): Model comparison, grade scatter, improvement analysis, study time analysis
-- RQ2 (5 figures): Parental education impact on grades and pass rates
-- RQ3 (4 figures): Fairness analysis across demographic groups
-- RQ4 (6 figures): Feature importance using Gini, permutation, and SHAP methods
-
-**Table Generation:**
-- RQ1_Table1.xlsx: Model performance metrics (accuracy, precision, recall, F1)
-- RQ3_Table1.xlsx: Fairness metrics (demographic parity, equal opportunity)
-
-**Regenerate all outputs:**
-```bash
-# Clean previous outputs and regenerate everything
-rm -rf figures/ tables/ data/ src/modeling/models/
-./run_all.sh
-
-# Or clean only figures and tables (keeps trained models and data)
-rm -rf figures/*.pdf tables/*.xlsx
-./run_all.sh
-
-# Or manually run individual steps (SHAP is auto-included in run_all.sh)
-python3 src/run_simple_analysis.py
-./src/generate_shap_with_py312.sh
+# Standalone loading (without Airflow)
+python3 -m src.data_ingestion.postgres_loader
 ```
 
 ## Folder Structure Explanation
