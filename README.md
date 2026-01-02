@@ -48,34 +48,7 @@ pip install -r requirements.txt
 chmod 600 ~/.kaggle/kaggle.json
 ```
 
-## Quick Start
-
-**Step 1: First-time setup (one-time only)**
-```bash
-# Linux/macOS:
-./src/setup_shap_env.sh
-
-# Windows:
-src\setup_shap_env.bat
-```
-
-**Step 2: Run complete workflow**
-```bash
-# Linux/macOS:
-./run_all_mac_linux.sh
-
-# Windows:
-run_all_windows.bat
-```
-
-**Outputs:** 19 PDF figures, 2 XLSX tables, 2 trained models
-**Runtime:** ~2-3 minutes
-
-For detailed options and Airflow setup, see [How to Run](#how-to-run-detailed-options) below.
-
----
-
-## How to Run (Detailed Options)
+## How to Run
 
 **All three options produce identical outputs:**
 - 19 PDF figures (RQ1: 4, RQ2: 5, RQ3: 4, RQ4: 6)

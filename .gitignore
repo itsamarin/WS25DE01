@@ -2,6 +2,12 @@
 .DS_Store
 **/.DS_Store
 
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info
+
 # Python virtual environments
 src/.venv_py312_shap/
 
