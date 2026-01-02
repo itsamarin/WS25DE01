@@ -48,35 +48,20 @@ pip install -r requirements.txt
 chmod 600 ~/.kaggle/kaggle.json
 ```
 
-## Quick Start - Complete Workflow
-
-**Fastest way to run the entire project and generate all outputs (19 figures + 2 tables):**
+## Quick Start
 
 ```bash
-# Option 1: Use convenience script (recommended - includes SHAP)
-# Automatically creates all necessary directories and handles dependencies
+# First-time setup (one-time only): Create Python 3.12 environment for SHAP
+./src/setup_shap_env.sh
+
+# Run complete workflow (generates all outputs)
 ./run_all.sh
-
-# Option 2: One-liner command (without SHAP)
-python3 main.py && python3 src/run_simple_analysis.py
 ```
 
-Or run step-by-step:
-```bash
-python3 main.py                      # Step 1: Run pipeline (download, clean, train, evaluate)
-python3 src/run_simple_analysis.py   # Step 2: Generate all figures and tables
-```
+**Outputs:** 19 PDF figures, 2 XLSX tables, 2 trained models
+**Runtime:** ~2-3 minutes
 
-**What you get:**
-- 19 PDF figures in `figures/` (RQ1: 4 figs, RQ2: 5 figs, RQ3: 4 figs, RQ4: 6 figs)
-  - RQ4_Fig6 includes SHAP beeswarm plot (auto-generated with Python 3.12 venv)
-- 2 XLSX tables in `tables/` (RQ1_Table1.xlsx, RQ3_Table1.xlsx)
-- Trained models in `src/modeling/models/`
-- Processed datasets in `data/`
-
-**Estimated runtime:** ~2-3 minutes (depending on hardware)
-
-**Note:** The workflow automatically creates all necessary output directories (`figures/`, `tables/`) - no manual setup required.
+For detailed options and Airflow setup, see [How to Run](#how-to-run-detailed-options) below.
 
 ---
 
