@@ -202,9 +202,7 @@ python3 -m src.data_ingestion.postgres_loader
 
 ---
 
-## Additional Information
-
-### Model Configuration
+## Model Configuration
 - **Models:** Random Forest (n_estimators=300), Logistic Regression, Linear Regression
 - **Split:** 80/20 train-test, stratified, random_state=42
 - **Feature Importance:** SHAP (Python 3.12 venv) + Permutation importance
