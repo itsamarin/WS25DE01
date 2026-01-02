@@ -228,25 +228,70 @@ def task_generate_figures(**context):
     Generates all required visualizations and tables for the research questions.
 
     Outputs:
-        - figures/RQ1_Fig*.pdf (Model comparison visualizations)
-        - figures/RQ2_Fig*.pdf (Parental education impact)
-        - figures/RQ3_Fig*.pdf (Fairness analysis)
-        - figures/RQ4_Fig*.pdf (Feature importance)
+        - figures/RQ1_Fig*.pdf (Model comparison visualizations - 4 figures)
+        - figures/RQ2_Fig*.pdf (Parental education impact - 5 figures)
+        - figures/RQ3_Fig*.pdf (Fairness analysis - 4 figures)
+        - figures/RQ4_Fig*.pdf (Feature importance - 6 figures)
         - tables/RQ1_Table1.xlsx (Model performance metrics)
         - tables/RQ3_Table1.xlsx (Fairness metrics)
     """
-    print("Generating figures and tables...")
+    import os
 
-    # Note: This assumes visualization scripts exist in src/evaluation/
-    # If not, this task would need to be implemented
+    print("="*70)
+    print("Task 6: Generating all 19 figures and 2 tables...")
+    print("="*70)
 
-    print("Figures and tables generation completed")
+    # Ensure output directories exist
+    os.makedirs('figures', exist_ok=True)
+    os.makedirs('tables', exist_ok=True)
+
+    # Import and run the main figure generation script
+    from src.run_simple_analysis import main as generate_all_figures
+    generate_all_figures()
+
+    print("\n" + "="*70)
+    print("All 19 figures and 2 tables generated successfully!")
+    print("="*70)
+
     return "Figure generation successful"
+
+
+def task_generate_shap(**context):
+    """
+    Task 7: Generate SHAP Visualization
+    Generates SHAP-based feature importance visualization for RQ4_Fig6.
+
+    Outputs:
+        - figures/RQ4_Fig6.pdf (SHAP beeswarm plot, replacing permutation importance)
+    """
+    import os
+    import subprocess
+
+    print("="*70)
+    print("Task 7: Generating SHAP visualization for RQ4_Fig6...")
+    print("="*70)
+
+    # Ensure figures directory exists
+    os.makedirs('figures', exist_ok=True)
+
+    # Run SHAP generation using the dedicated Python 3.12 virtual environment
+    script_path = os.path.join(project_root, 'generate_shap_with_py312.sh')
+    result = subprocess.run([script_path], cwd=project_root, capture_output=True, text=True)
+
+    if result.returncode != 0:
+        print("\nWARNING: SHAP generation failed. RQ4_Fig6 will use permutation importance fallback.")
+        print(f"Error: {result.stderr}")
+    else:
+        print("\n" + "="*70)
+        print("SHAP visualization generated successfully!")
+        print("="*70)
+
+    return "SHAP generation completed"
 
 
 def task_pipeline_completion(**context):
     """
-    Task 7: Pipeline Completion and Summary
+    Task 8: Pipeline Completion and Summary
     Summarizes pipeline execution and prints key metrics.
     """
     ti = context['ti']
@@ -346,10 +391,24 @@ t6_figures = PythonOperator(
     doc_md="""
     ### Generate Figures Task
     Creates all visualizations and tables for research questions.
+    - Generates 19 PDF figures (RQ1-RQ4)
+    - Generates 2 XLSX tables
     """
 )
 
-t7_completion = PythonOperator(
+t7_shap = PythonOperator(
+    task_id='generate_shap',
+    python_callable=task_generate_shap,
+    dag=dag,
+    doc_md="""
+    ### Generate SHAP Visualization Task
+    Creates SHAP-based feature importance visualization.
+    - Replaces RQ4_Fig6 with SHAP beeswarm plot
+    - Uses Python 3.12 virtual environment
+    """
+)
+
+t8_completion = PythonOperator(
     task_id='pipeline_completion',
     python_callable=task_pipeline_completion,
     dag=dag,
@@ -361,7 +420,7 @@ t7_completion = PythonOperator(
 
 # Define task dependencies (linear pipeline)
 # Each task depends on the successful completion of the previous task
-t1_ingestion >> t2_cleaning >> t3_features >> t4_training >> t5_evaluation >> t6_figures >> t7_completion
+t1_ingestion >> t2_cleaning >> t3_features >> t4_training >> t5_evaluation >> t6_figures >> t7_shap >> t8_completion
 
 """
 DAG Structure:
@@ -378,8 +437,15 @@ DAG Structure:
            ↓
     [Generate Figures]
            ↓
+    [Generate SHAP]
+           ↓
     [Pipeline Completion]
 
 This pipeline ensures that each stage completes successfully before moving to the next,
 maintaining data quality and model reproducibility throughout the process.
+
+Outputs:
+- 19 PDF figures in figures/ (RQ1: 4, RQ2: 5, RQ3: 4, RQ4: 6)
+- 2 XLSX tables in tables/ (RQ1_Table1.xlsx, RQ3_Table1.xlsx)
+- 2 trained models in src/modeling/models/
 """

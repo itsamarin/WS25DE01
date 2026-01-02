@@ -333,6 +333,9 @@ def save_model(model: Pipeline, filepath: str) -> None:
         model: Trained model pipeline
         filepath: Path to save the model
     """
+    import os
+    # Ensure directory exists
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
     joblib.dump(model, filepath)
     print(f"Saved model to {filepath}")
 

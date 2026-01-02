@@ -82,24 +82,40 @@ python3 src/run_simple_analysis.py   # Step 2: Generate all figures and tables
 
 ## How to Run (Detailed Options)
 
-### Option 1: Standalone Pipeline (Easiest)
+All three options below produce identical outputs: **19 PDF figures + 2 XLSX tables + 2 trained models**
+
+### Option 1: Standalone Pipeline (Easiest - Recommended)
 ```bash
-python main.py  # Run complete pipeline without Airflow
+# Complete workflow with all outputs (includes SHAP)
+./run_all.sh
+
+# Alternative: Run core pipeline only (without figures/SHAP)
+python3 main.py  # Outputs: 2 trained models, processed data
 ```
 
-### Option 2: Individual Modules
+**Note:** For full output (19 figures + 2 tables), use `./run_all.sh` or add figure generation steps manually.
+
+### Option 2: Individual Modules (Step-by-step)
 ```bash
-python -m src.data_ingestion.loader        # Download data
-python -m src.data_cleaning.cleaner        # Clean data
-python -m src.feature_engineering.features # Create features
-python -m src.modeling.train               # Train models
-python -m src.evaluation.metrics           # Evaluate
+python3 -m src.data_ingestion.loader        # Step 1: Download data
+python3 -m src.data_cleaning.cleaner        # Step 2: Clean data
+python3 -m src.feature_engineering.features # Step 3: Create features
+python3 -m src.modeling.train               # Step 4: Train models
+python3 -m src.evaluation.metrics           # Step 5: Evaluate models
+python3 src/run_simple_analysis.py          # Step 6: Generate all 19 figures and 2 tables
+./generate_shap_with_py312.sh               # Step 7: Generate SHAP visualization for RQ4_Fig6
 ```
+
+**Outputs:** 19 PDF figures + 2 XLSX tables + 2 trained models
 
 ### Option 3: Airflow DAG (Advanced - Python 3.12 or earlier required)
 See [Airflow Setup](#how-to-run-the-airflow-dag) below for automated orchestration.
 
-**Note:** Airflow DAG requires Python 3.12 or earlier due to compatibility issues with Airflow 2.x and Python 3.14+. For simplest execution, use Option 1 or the convenience script `./run_all.sh`.
+**Prerequisites:** Python 3.12 or earlier (Airflow 2.x incompatible with Python 3.14+)
+
+**Outputs:** 19 PDF figures + 2 XLSX tables + 2 trained models (same as Options 1 & 2)
+
+**Note:** The DAG is fully configured with all 8 tasks including figure generation and SHAP. For Python 3.14+ users, use Option 1 (`./run_all.sh`) or Option 2 instead.
 
 ## How to Run the Airflow DAG
 
@@ -127,7 +143,9 @@ airflow scheduler              # Terminal 2
 - **CLI:** `airflow dags trigger student_performance_prediction_pipeline`
 
 ### DAG Tasks (Sequential)
-1. data_ingestion → 2. data_cleaning → 3. feature_engineering → 4. model_training → 5. model_evaluation → 6. generate_figures → 7. pipeline_completion
+1. data_ingestion → 2. data_cleaning → 3. feature_engineering → 4. model_training → 5. model_evaluation → 6. generate_figures → 7. generate_shap → 8. pipeline_completion
+
+**Outputs:** Same as Option 1 (19 PDF figures + 2 XLSX tables + 2 trained models)
 
 ## Model Configuration
 
