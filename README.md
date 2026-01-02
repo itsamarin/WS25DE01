@@ -55,11 +55,11 @@ chmod 600 ~/.kaggle/kaggle.json
 - 2 XLSX tables (RQ1_Table1.xlsx, RQ3_Table1.xlsx)
 - 2 trained models (rf_pass_prediction.pkl, linear_regression_model.pkl)
 
-| Option | Method | Steps | Runtime | Python Version | Status |
-|--------|--------|-------|---------|----------------|--------|
-| **Option 1** | Automated script | 3 steps | 2-3 min | 3.8+ | ✓ Easiest |
-| **Option 2** | Manual step-by-step | 7 steps | 3-8 min | 3.8+ | ✓ Working |
-| **Option 3** | Airflow DAG | 9 tasks | 5-15 min | **3.12 or earlier** | ✓ Configured |
+| Option | Method | What it runs | Runtime* | Python Version | Best for |
+|--------|--------|--------------|----------|----------------|----------|
+| **Option 1** | Automated script | `main.py` + figures + SHAP | **2-3 min** | 3.8+ | ✓ Quick results |
+| **Option 2** | Manual step-by-step | Individual modules | 3-8 min | 3.8+ | ✓ Learning/debugging |
+| **Option 3** | Airflow DAG | Orchestrated tasks | 5-15 min | **3.12 or earlier** | ✓ Production workflows |
 
 ### Option 1: Standalone Pipeline (Easiest)
 
@@ -75,10 +75,10 @@ src\setup_shap_env.bat
 **Step 2: Run complete workflow**
 ```bash
 # Linux/macOS:
-./run_all_mac_linux.sh
+./src/run_all_mac_linux.sh
 
 # Windows:
-run_all_windows.bat
+src\run_all_windows.bat
 ```
 
 **What it does:**
@@ -251,6 +251,8 @@ WS25DE01/
 │   ├── generate_shap_fig6.py               # SHAP beeswarm visualization for RQ4_Fig6
 │   ├── generate_enhanced_fig6.py           # Permutation importance fallback for RQ4_Fig6
 │   ├── generate_shap_with_py312.sh         # Shell wrapper to run SHAP (Linux/macOS)
+│   ├── run_all_mac_linux.sh                # Complete workflow script (macOS/Linux)
+│   ├── run_all_windows.bat                 # Complete workflow script (Windows)
 │   ├── setup_shap_env.sh                   # SHAP environment setup (Linux/macOS)
 │   ├── setup_shap_env.bat                  # SHAP environment setup (Windows)
 │   └── run_simple_analysis.py              # Main script to generate all figures/tables
@@ -269,8 +271,6 @@ WS25DE01/
 │   └── RQ3_Table1.xlsx                     # Fairness metrics
 │
 ├── main.py                                 # Standalone pipeline runner (no Airflow)
-├── run_all_mac_linux.sh                    # Complete workflow script (macOS/Linux)
-├── run_all_windows.bat                     # Complete workflow script (Windows)
 ├── requirements.txt                        # Python dependencies
 ├── .gitignore                              # Git ignore configuration
 └── README.md                               # This file
