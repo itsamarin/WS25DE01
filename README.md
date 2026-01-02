@@ -66,19 +66,19 @@ chmod 600 ~/.kaggle/kaggle.json
 **Step 1: First-time setup (one-time only)**
 ```bash
 # Linux/macOS:
-./src/setup_shap_env.sh
+./src/mac_linux_setup_shap.sh
 
 # Windows:
-src\setup_shap_env.bat
+src\windows_setup_shap.bat
 ```
 
 **Step 2: Run complete workflow**
 ```bash
 # Linux/macOS:
-./src/run_all_mac_linux.sh
+./src/mac_linux_run_all.sh
 
 # Windows:
-src\run_all_windows.bat
+src\windows_run_all.bat
 ```
 
 **What it does:**
@@ -199,10 +199,10 @@ airflow scheduler
 ### SHAP Setup (One-Time)
 ```bash
 # Linux/macOS:
-./src/setup_shap_env.sh
+./src/mac_linux_setup_shap.sh
 
 # Windows:
-src\setup_shap_env.bat
+src\windows_setup_shap.bat
 ```
 Run this once before using the complete workflow. If Python 3.12 unavailable, RQ4_Fig6 uses permutation importance.
 
@@ -251,11 +251,11 @@ WS25DE01/
 │   ├── generate_shap_fig6.py               # SHAP beeswarm visualization for RQ4_Fig6
 │   ├── generate_enhanced_fig6.py           # Permutation importance fallback for RQ4_Fig6
 │   ├── generate_shap_with_py312.sh         # Shell wrapper to run SHAP (Linux/macOS)
-│   ├── run_all_mac_linux.sh                # Complete workflow script (macOS/Linux)
-│   ├── run_all_windows.bat                 # Complete workflow script (Windows)
-│   ├── setup_shap_env.sh                   # SHAP environment setup (Linux/macOS)
-│   ├── setup_shap_env.bat                  # SHAP environment setup (Windows)
-│   └── run_simple_analysis.py              # Main script to generate all figures/tables
+│   ├── mac_linux_run_all.sh                # Complete workflow script (macOS/Linux)
+│   ├── mac_linux_setup_shap.sh             # SHAP environment setup (Linux/macOS)
+│   ├── run_simple_analysis.py              # Main script to generate all figures/tables
+│   ├── windows_run_all.bat                 # Complete workflow script (Windows)
+│   └── windows_setup_shap.bat              # SHAP environment setup (Windows)
 │
 ├── data/                                   # Data storage (NO large raw datasets in Git)
 │   └── sample/                             # Sample data files only
