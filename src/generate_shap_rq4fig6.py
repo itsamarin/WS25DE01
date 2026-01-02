@@ -39,9 +39,9 @@ def main():
         print(f"  - SHAP version: {shap.__version__}")
     except Exception as e:
         print(f"  - ERROR: Failed to import SHAP: {e}")
-        print("  - Falling back to generate_enhanced_fig6.py...")
-        from src.generate_enhanced_fig6 import main as generate_fig6
-        generate_fig6()
+        print("  - Falling back to generate_permutation_rq4fig6.py...")
+        from src.generate_permutation_rq4fig6 import main as generate_rq4fig6
+        generate_rq4fig6()
         return
 
     # Extract model and preprocessor from pipeline

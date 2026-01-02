@@ -280,7 +280,7 @@ def task_generate_figures(**context):
     os.makedirs('tables', exist_ok=True)
 
     # Import and run the main figure generation script
-    from src.run_simple_analysis import main as generate_all_figures
+    from src.generate_all_figures import main as generate_all_figures
     generate_all_figures()
 
     print("\n" + "="*70)
@@ -309,7 +309,7 @@ def task_generate_shap(**context):
     os.makedirs('figures', exist_ok=True)
 
     # Run SHAP generation using the dedicated Python 3.12 virtual environment
-    script_path = os.path.join(project_root, 'src', 'generate_shap_with_py312.sh')
+    script_path = os.path.join(project_root, 'src', 'mac_linux_generate_shap.sh')
     result = subprocess.run([script_path], cwd=project_root, capture_output=True, text=True)
 
     if result.returncode != 0:

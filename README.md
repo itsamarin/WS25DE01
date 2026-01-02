@@ -86,7 +86,7 @@ src\windows_run_all.bat
 2. Generates all 19 figures and 2 tables
 3. Generates SHAP visualization for RQ4_Fig6
 
-**Note:** For manual control, run: `python main.py` (pipeline only) or `python src/run_simple_analysis.py` (figures only)
+**Note:** For manual control, run: `python main.py` (pipeline only) or `python src/generate_all_figures.py` (figures only)
 
 ### Option 2: Individual Modules (Step-by-step)
 
@@ -97,16 +97,16 @@ python -m src.data_cleaning.cleaner        # Step 2: Clean data
 python -m src.feature_engineering.features # Step 3: Create features
 python -m src.modeling.train               # Step 4: Train models
 python -m src.evaluation.metrics           # Step 5: Evaluate models
-python src/run_simple_analysis.py          # Step 6: Generate all 19 figures and 2 tables
+python src/generate_all_figures.py         # Step 6: Generate all 19 figures and 2 tables
 ```
 
 **Step 7: Generate SHAP visualization for RQ4_Fig6**
 ```bash
 # Linux/macOS:
-./src/generate_shap_with_py312.sh
+./src/mac_linux_generate_shap.sh
 
 # Windows:
-src\.venv_py312_shap\Scripts\python src\generate_shap_fig6.py
+src\.venv_py312_shap\Scripts\python src\generate_shap_rq4fig6.py
 ```
 
 **When to use:** Fine-grained control over each pipeline stage, debugging, or learning the workflow.
@@ -248,12 +248,12 @@ WS25DE01/
 │   │   └── visualizations.py               # All RQ figure generation code (RQ1-RQ4)
 │   │
 │   ├── .venv_py312_shap/                   # Python 3.12 virtual environment for SHAP (git-ignored)
-│   ├── generate_shap_fig6.py               # SHAP beeswarm visualization for RQ4_Fig6
 │   ├── generate_enhanced_fig6.py           # Permutation importance fallback for RQ4_Fig6
-│   ├── generate_shap_with_py312.sh         # Shell wrapper to run SHAP (Linux/macOS)
+│   ├── mac_linux_generate_shap.sh          # Shell wrapper to run SHAP (Linux/macOS)
 │   ├── mac_linux_run_all.sh                # Complete workflow script (macOS/Linux)
 │   ├── mac_linux_setup_shap.sh             # SHAP environment setup (Linux/macOS)
 │   ├── run_simple_analysis.py              # Main script to generate all figures/tables
+│   ├── windows_generate_shap.py            # SHAP beeswarm visualization for RQ4_Fig6
 │   ├── windows_run_all.bat                 # Complete workflow script (Windows)
 │   └── windows_setup_shap.bat              # SHAP environment setup (Windows)
 │

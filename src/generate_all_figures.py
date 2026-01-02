@@ -5,7 +5,7 @@ This script generates all 19 PDF figures and 2 XLSX tables programmatically.
 Run this after training models with main.py
 
 Usage:
-    python3 src/run_simple_analysis.py
+    python3 src/generate_all_figures.py
 """
 
 import sys
@@ -474,8 +474,8 @@ def main():
 
     # RQ4_Fig6: Enhanced feature importance
     print("    Generating enhanced feature importance visualization...")
-    from src.generate_enhanced_fig6 import main as generate_fig6
-    generate_fig6()
+    from src.generate_permutation_rq4fig6 import main as generate_rq4fig6
+    generate_rq4fig6()
 
     print("  RQ4: 6 figures generated")
 
