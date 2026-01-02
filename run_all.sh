@@ -61,12 +61,39 @@ echo ""
 # Step 3: Generate SHAP visualization for RQ4_Fig6
 echo "[STEP 3/3] Generating SHAP visualization for RQ4_Fig6..."
 echo "--------------------------------------------------------------------------------"
-./src/generate_shap_with_py312.sh
 
-if [ $? -ne 0 ]; then
+# Check if Python 3.12 venv exists
+if [ ! -f "src/.venv_py312_shap/bin/python" ]; then
     echo ""
-    echo "WARNING: SHAP generation failed. RQ4_Fig6 will use permutation importance fallback."
-    echo "This is not critical - all other figures were generated successfully."
+    echo "========================================================================"
+    echo "  PYTHON 3.12 VIRTUAL ENVIRONMENT REQUIRED FOR RQ4_Fig6 (SHAP)"
+    echo "========================================================================"
+    echo ""
+    echo "  RQ4_Fig6 requires SHAP visualization, which needs Python 3.12."
+    echo ""
+    echo "  To set up the environment (one-time setup):"
+    echo "    ./src/setup_shap_env.sh"
+    echo ""
+    echo "  Current status: RQ4_Fig6 uses permutation importance (temporary)"
+    echo "  For the full SHAP beeswarm plot, please run the setup script above."
+    echo ""
+    echo "========================================================================"
+else
+    ./src/generate_shap_with_py312.sh
+
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo "========================================================================"
+        echo "  WARNING: SHAP GENERATION FAILED"
+        echo "========================================================================"
+        echo ""
+        echo "  RQ4_Fig6 will use permutation importance fallback."
+        echo "  To fix SHAP, try reinstalling the environment:"
+        echo "    rm -rf src/.venv_py312_shap"
+        echo "    ./src/setup_shap_env.sh"
+        echo ""
+        echo "========================================================================"
+    fi
 fi
 
 echo ""

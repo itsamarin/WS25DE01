@@ -95,6 +95,9 @@ python3 src/run_simple_analysis.py   # Step 2: Generate all figures and tables
 
 ### Option 1: Standalone Pipeline (Easiest)
 ```bash
+# First-time setup: Create Python 3.12 environment for SHAP (one-time only)
+./src/setup_shap_env.sh
+
 # Complete workflow with all outputs (includes SHAP)
 ./run_all.sh
 
@@ -105,9 +108,9 @@ python3 main.py  # Outputs: 2 trained models, processed data
 **What it does:**
 1. Runs main pipeline (data ingestion, cleaning, feature engineering, model training, evaluation)
 2. Generates all 19 figures and 2 tables
-3. Generates SHAP visualization for RQ4_Fig6
+3. Generates SHAP visualization for RQ4_Fig6 (requires Python 3.12 venv)
 
-**Note:** For full output (19 figures + 2 tables), use `./run_all.sh` or add figure generation steps manually.
+**Note:** SHAP visualization requires Python 3.12. Run `./src/setup_shap_env.sh` once to set up the environment. If Python 3.12 is not available, RQ4_Fig6 will use permutation importance instead.
 
 ### Option 2: Individual Modules (Step-by-step)
 ```bash
@@ -254,7 +257,25 @@ GROUP BY course;
 
 This project includes SHAP (SHapley Additive exPlanations) support for advanced model interpretability. Due to dependency compatibility issues between SHAP and Python 3.14+, we maintain a separate Python 3.12 virtual environment specifically for SHAP visualizations.
 
-**SHAP is automatically included when using `./run_all.sh`** - no additional steps needed!
+### First-Time Setup
+
+**Before running SHAP visualizations, set up the Python 3.12 environment (one-time only):**
+
+```bash
+./src/setup_shap_env.sh
+```
+
+This script will:
+1. Check if Python 3.12 is installed
+2. Create a virtual environment at `src/.venv_py312_shap/`
+3. Install SHAP and required dependencies
+
+**If Python 3.12 is not installed:**
+- macOS: `brew install python@3.12`
+- Ubuntu/Debian: `sudo apt install python3.12 python3.12-venv`
+- Or download from: https://www.python.org/downloads/
+
+After setup, **SHAP is automatically included when using `./run_all.sh`** - no additional steps needed!
 
 ### Manual SHAP Generation
 
@@ -264,16 +285,18 @@ If you need to regenerate only the SHAP visualization:
 ./src/generate_shap_with_py312.sh
 ```
 
-**Available SHAP Scripts:**
-- [src/generate_shap_fig6.py](src/generate_shap_fig6.py) - Main SHAP visualization (recommended)
-- [src/generate_shap_figure.py](src/generate_shap_figure.py) - Alternative SHAP generator
-- [src/generate_shap_kernel.py](src/generate_shap_kernel.py) - SHAP KernelExplainer version
+**SHAP Scripts:**
+- [src/generate_shap_fig6.py](src/generate_shap_fig6.py) - SHAP beeswarm visualization
+- [src/generate_shap_with_py312.sh](src/generate_shap_with_py312.sh) - Shell wrapper for Python 3.12 venv
+- [src/setup_shap_env.sh](src/setup_shap_env.sh) - Setup script for Python 3.12 environment
+- [src/generate_enhanced_fig6.py](src/generate_enhanced_fig6.py) - Permutation importance fallback
 
 **Environment:**
 - Python 3.12 virtual environment: [src/.venv_py312_shap](src/.venv_py312_shap)
 - Isolated from main project dependencies to avoid conflicts
+- **Note:** The virtual environment is excluded from Git (see `.gitignore`)
 
-**Note:** When running [src/run_simple_analysis.py](src/run_simple_analysis.py) standalone, RQ4_Fig6 uses permutation importance. The [run_all.sh](run_all.sh) script automatically replaces this with the SHAP beeswarm plot in Step 3.
+**Fallback:** When running [src/run_simple_analysis.py](src/run_simple_analysis.py) standalone, RQ4_Fig6 uses permutation importance. The [run_all.sh](run_all.sh) script automatically replaces this with the SHAP beeswarm plot in Step 3 (if the Python 3.12 environment is set up).
 
 ## Reproducibility
 
@@ -338,12 +361,11 @@ WS25DE01/
 │   │   ├── metrics.py                      # Performance metrics, feature importance, fairness
 │   │   └── visualizations.py               # All RQ figure generation code (RQ1-RQ4)
 │   │
-│   ├── .venv_py312_shap/                   # Python 3.12 virtual environment for SHAP
-│   ├── generate_shap_fig6.py               # SHAP-based RQ4_Fig6 generator
-│   ├── generate_shap_figure.py             # Alternative SHAP generator
-│   ├── generate_shap_kernel.py             # SHAP KernelExplainer version
-│   ├── generate_enhanced_fig6.py           # Enhanced permutation importance fallback
-│   ├── generate_shap_with_py312.sh         # Shell script to generate SHAP with Python 3.12
+│   ├── .venv_py312_shap/                   # Python 3.12 virtual environment for SHAP (git-ignored)
+│   ├── generate_shap_fig6.py               # SHAP beeswarm visualization for RQ4_Fig6
+│   ├── generate_enhanced_fig6.py           # Permutation importance fallback for RQ4_Fig6
+│   ├── generate_shap_with_py312.sh         # Shell wrapper to run SHAP with Python 3.12 venv
+│   ├── setup_shap_env.sh                   # Setup script for Python 3.12 virtual environment
 │   └── run_simple_analysis.py              # Main script to generate all figures/tables
 │
 ├── data/                                   # Data storage (NO large raw datasets in Git)
