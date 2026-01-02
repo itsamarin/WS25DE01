@@ -248,12 +248,12 @@ WS25DE01/
 │   │   └── visualizations.py               # All RQ figure generation code (RQ1-RQ4)
 │   │
 │   ├── .venv_py312_shap/                   # Python 3.12 virtual environment for SHAP (git-ignored)
-│   ├── generate_enhanced_fig6.py           # Permutation importance fallback for RQ4_Fig6
+│   ├── generate_all_figures.py             # Main script to generate all 19 figures and 2 tables
+│   ├── generate_permutation_rq4fig6.py     # Permutation importance fallback for RQ4_Fig6
+│   ├── generate_shap_rq4fig6.py            # SHAP beeswarm visualization for RQ4_Fig6
 │   ├── mac_linux_generate_shap.sh          # Shell wrapper to run SHAP (Linux/macOS)
 │   ├── mac_linux_run_all.sh                # Complete workflow script (macOS/Linux)
 │   ├── mac_linux_setup_shap.sh             # SHAP environment setup (Linux/macOS)
-│   ├── run_simple_analysis.py              # Main script to generate all figures/tables
-│   ├── windows_generate_shap.py            # SHAP beeswarm visualization for RQ4_Fig6
 │   ├── windows_run_all.bat                 # Complete workflow script (Windows)
 │   └── windows_setup_shap.bat              # SHAP environment setup (Windows)
 │
