@@ -24,3 +24,7 @@ xlrd>=2.0.0
 
 # Workflow Orchestration
 apache-airflow>=2.7.0
+
+# Database
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0

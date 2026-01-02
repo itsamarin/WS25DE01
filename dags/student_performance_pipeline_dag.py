@@ -123,6 +123,40 @@ def task_feature_engineering(**context):
     return "Feature engineering successful"
 
 
+def task_load_to_postgres(**context):
+    """
+    Task 3.5: Load Data to PostgreSQL
+    Loads both cleaned data and ABT into PostgreSQL database for data warehouse integration.
+
+    Inputs:
+        - data/cleaned/student_performance_clean.csv
+        - data/processed/abt_student_performance.csv
+    Outputs:
+        - PostgreSQL tables: student_performance_cleaned, student_performance_abt
+    """
+    from src.data_ingestion.postgres_loader import load_cleaned_data_to_postgres, load_abt_to_postgres
+
+    print("="*70)
+    print("Task 3.5: Loading data to PostgreSQL...")
+    print("="*70)
+
+    # Load cleaned data
+    rows_cleaned = load_cleaned_data_to_postgres()
+
+    # Load ABT
+    rows_abt = load_abt_to_postgres()
+
+    # Push metadata to XCom
+    context['ti'].xcom_push(key='postgres_cleaned_rows', value=rows_cleaned)
+    context['ti'].xcom_push(key='postgres_abt_rows', value=rows_abt)
+
+    print(f"\n✓ PostgreSQL loading completed")
+    print(f"  - Cleaned data: {rows_cleaned} rows")
+    print(f"  - ABT data: {rows_abt} rows")
+
+    return "PostgreSQL loading successful"
+
+
 def task_model_training(**context):
     """
     Task 4: Model Training
@@ -361,6 +395,18 @@ t3_features = PythonOperator(
     """
 )
 
+t3_5_postgres = PythonOperator(
+    task_id='load_to_postgres',
+    python_callable=task_load_to_postgres,
+    dag=dag,
+    doc_md="""
+    ### Load to PostgreSQL Task
+    Loads cleaned data and ABT into PostgreSQL database.
+    - Tables: student_performance_cleaned, student_performance_abt
+    - Enables data warehouse integration
+    """
+)
+
 t4_training = PythonOperator(
     task_id='model_training',
     python_callable=task_model_training,
@@ -418,9 +464,12 @@ t8_completion = PythonOperator(
     """
 )
 
-# Define task dependencies (linear pipeline)
-# Each task depends on the successful completion of the previous task
+# Define task dependencies
+# Main pipeline (uses CSV files for ML pipeline)
 t1_ingestion >> t2_cleaning >> t3_features >> t4_training >> t5_evaluation >> t6_figures >> t7_shap >> t8_completion
+
+# Parallel branch: Load data to PostgreSQL for data warehouse (independent, doesn't block main pipeline)
+t3_features >> t3_5_postgres
 
 """
 DAG Structure:
@@ -430,8 +479,8 @@ DAG Structure:
     [Data Cleaning]
            ↓
     [Feature Engineering]
-           ↓
-    [Model Training]
+           ↓                    ↘
+    [Model Training]          [Load to PostgreSQL] ← Parallel branch for data warehouse
            ↓
     [Model Evaluation]
            ↓
@@ -441,10 +490,18 @@ DAG Structure:
            ↓
     [Pipeline Completion]
 
-This pipeline ensures that each stage completes successfully before moving to the next,
-maintaining data quality and model reproducibility throughout the process.
+Main Pipeline (left branch):
+- Uses CSV files throughout
+- Each stage completes successfully before moving to the next
+- Maintains data quality and model reproducibility
+
+Parallel Branch (right branch):
+- PostgreSQL loading runs independently after feature engineering
+- Loads data to warehouse without blocking ML pipeline
+- Useful for BI tools, reporting, and data warehouse integration
 
 Outputs:
+- PostgreSQL Database: student_performance_cleaned, student_performance_abt tables (parallel branch)
 - 19 PDF figures in figures/ (RQ1: 4, RQ2: 5, RQ3: 4, RQ4: 6)
 - 2 XLSX tables in tables/ (RQ1_Table1.xlsx, RQ3_Table1.xlsx)
 - 2 trained models in src/modeling/models/

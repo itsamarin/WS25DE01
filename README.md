@@ -89,11 +89,11 @@ python3 src/run_simple_analysis.py   # Step 2: Generate all figures and tables
 
 | Option | Method | Steps | Runtime | Python Version | Status |
 |--------|--------|-------|---------|----------------|--------|
-| **Option 1** | Automated script | 3 steps | 2-3 min | 3.8+ | ✓ Recommended |
+| **Option 1** | Automated script | 3 steps | 2-3 min | 3.8+ | ✓ Easiest |
 | **Option 2** | Manual step-by-step | 7 steps | 2-3 min | 3.8+ | ✓ Working |
-| **Option 3** | Airflow DAG | 8 tasks | 2-3 min | **3.12 or earlier** | ✓ Configured |
+| **Option 3** | Airflow DAG | 9 tasks | 2-3 min | **3.12 or earlier** | ✓ Configured |
 
-### Option 1: Standalone Pipeline (Easiest - Recommended)
+### Option 1: Standalone Pipeline (Easiest)
 ```bash
 # Complete workflow with all outputs (includes SHAP)
 ./run_all.sh
@@ -129,25 +129,39 @@ See [Airflow Setup](#how-to-run-the-airflow-dag) below for automated orchestrati
 
 **When to use:** Production workflows, scheduling, monitoring, or integration with existing Airflow infrastructure.
 
-**Important:** The DAG is fully configured with all 8 tasks including figure generation and SHAP. It will produce identical outputs to Options 1 & 2 when run with Python 3.12 or earlier. For Python 3.14+ users, use Option 1 or Option 2 instead.
+**Important:** The DAG is fully configured with all 9 tasks including PostgreSQL loading, figure generation, and SHAP. It will produce identical outputs to Options 1 & 2 when run with Python 3.12 or earlier. For Python 3.14+ users, use Option 1 or Option 2 instead.
 
 ## How to Run the Airflow DAG
 
 ### Setup
 
-**Prerequisites:** Python 3.12 or earlier, Airflow 2.x
+**Prerequisites:** Python 3.12 or earlier, Airflow 2.x, PostgreSQL 12+
 
 ```bash
-# 1. Initialize Airflow (first time only)
+# 1. Set up PostgreSQL (if using PostgreSQL integration)
+# Option A: Using Docker
+docker run --name postgres-student -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=student_performance -p 5432:5432 -d postgres:15
+
+# Option B: Using local PostgreSQL
+createdb student_performance
+
+# Configure PostgreSQL connection (optional - uses defaults if not set)
+export POSTGRES_HOST=localhost
+export POSTGRES_PORT=5432
+export POSTGRES_DB=student_performance
+export POSTGRES_USER=postgres
+export POSTGRES_PASSWORD=postgres
+
+# 2. Initialize Airflow (first time only)
 export AIRFLOW_HOME=$(pwd)/airflow
 airflow db migrate  # Updated command for Airflow 2.x (use 'init' for older versions)
 airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com
 
-# 2. Link DAG file
+# 3. Link DAG file
 mkdir -p $AIRFLOW_HOME/dags
 ln -s $(pwd)/dags/student_performance_pipeline_dag.py $AIRFLOW_HOME/dags/
 
-# 3. Start Airflow (two terminals)
+# 4. Start Airflow (two terminals)
 airflow webserver --port 8080  # Terminal 1
 airflow scheduler              # Terminal 2
 ```
@@ -156,10 +170,75 @@ airflow scheduler              # Terminal 2
 - **UI:** Open `http://localhost:8080` → Toggle DAG ON → Click Trigger
 - **CLI:** `airflow dags trigger student_performance_prediction_pipeline`
 
-### DAG Tasks (Sequential)
+### DAG Tasks (Parallel Execution)
+
+**Main Pipeline (uses CSV files):**
 1. data_ingestion → 2. data_cleaning → 3. feature_engineering → 4. model_training → 5. model_evaluation → 6. generate_figures → 7. generate_shap → 8. pipeline_completion
 
-**Outputs:** Same as Option 1 (19 PDF figures + 2 XLSX tables + 2 trained models)
+**Parallel Branch (data warehouse):**
+3. feature_engineering → 3.5. load_to_postgres
+
+The PostgreSQL loading runs independently as a parallel branch after feature engineering. This allows data to be ingested into the database for BI tools and reporting without blocking the ML pipeline, which continues using CSV files.
+
+**Outputs:**
+- PostgreSQL tables: `student_performance_cleaned`, `student_performance_abt` (parallel branch)
+- 19 PDF figures + 2 XLSX tables + 2 trained models (same as Options 1 & 2)
+
+## PostgreSQL Database Integration
+
+The Airflow DAG includes PostgreSQL integration as a parallel branch for data warehouse functionality. This allows the ML pipeline to continue using CSV files while simultaneously loading data to PostgreSQL for BI tools, reporting, and data warehouse integration.
+
+### Database Schema
+
+**Tables Created:**
+1. `student_performance_cleaned` - Cleaned student data (1,048 rows, 34 columns)
+2. `student_performance_abt` - Analytical Base Table with engineered features (1,048 rows, 38 columns)
+
+**Key Features:**
+- Automatic table creation with proper data types
+- Indexes on frequently queried columns (course, target_pass, G3)
+- Timestamp tracking (`created_at` column)
+- Support for both Docker and local PostgreSQL installations
+
+### Standalone PostgreSQL Loading
+
+You can also load data to PostgreSQL independently of Airflow:
+
+```bash
+# Ensure PostgreSQL is running and configured
+export POSTGRES_HOST=localhost
+export POSTGRES_DB=student_performance
+export POSTGRES_USER=postgres
+export POSTGRES_PASSWORD=postgres
+
+# Load data to PostgreSQL
+python3 -m src.data_ingestion.postgres_loader
+```
+
+This loads both cleaned data and ABT tables.
+
+### Querying the Data
+
+```sql
+-- Connect to database
+psql -U postgres -d student_performance
+
+-- View total students and pass rate
+SELECT
+    COUNT(*) as total_students,
+    SUM(CASE WHEN target_pass = 1 THEN 1 ELSE 0 END) as passed,
+    AVG(G3) as avg_final_grade
+FROM student_performance_abt;
+
+-- View performance by course
+SELECT
+    course,
+    COUNT(*) as students,
+    AVG(G3) as avg_grade,
+    SUM(CASE WHEN target_pass = 1 THEN 1 ELSE 0 END)::FLOAT / COUNT(*) as pass_rate
+FROM student_performance_abt
+GROUP BY course;
+```
 
 ## Model Configuration
 
@@ -311,22 +390,6 @@ Creates derived features (avg_prev_grade, grade_trend, high_absence, target_pass
 - SHAP (SHapley Additive exPlanations) for model interpretability
 - Permutation importance with uncertainty quantification (default)
 **Output:** `figures/*.pdf`, `tables/*.xlsx`
-
-## Output Verification
-
-All three execution options have been tested and verified to produce identical outputs:
-
-**Verified Outputs:**
-- ✓ 19 PDF figures in `figures/` (RQ1_Fig1-4, RQ2_Fig1-5, RQ3_Fig1-4, RQ4_Fig1-6)
-- ✓ 2 XLSX tables in `tables/` (RQ1_Table1.xlsx, RQ3_Table1.xlsx)
-- ✓ 2 trained models in `src/modeling/models/` (rf_pass_prediction.pkl, linear_regression_model.pkl)
-
-**Testing Summary:**
-- Option 1 (`./run_all.sh`): ✓ Tested with Python 3.14
-- Option 2 (Individual modules): ✓ Tested with Python 3.14
-- Option 3 (Airflow DAG): ✓ Configuration verified (requires Python 3.12)
-
-All options execute the same underlying code and produce bit-identical results.
 
 ## License & Contact
 
