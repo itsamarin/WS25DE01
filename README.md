@@ -187,6 +187,19 @@ airflow scheduler
 
 **Note:** Python 3.14+ users should use Option 1 or 2 instead due to Airflow 2.x compatibility.
 
+#### PostgreSQL Integration (Optional)
+
+The Airflow DAG can optionally load data to PostgreSQL as a parallel branch for data warehouse integration.
+
+**Tables created:**
+- `student_performance_cleaned`
+- `student_performance_abt`
+
+**Standalone loading (without Airflow):**
+```bash
+python3 -m src.data_ingestion.postgres_loader
+```
+
 ---
 
 ## Additional Information
@@ -195,23 +208,6 @@ airflow scheduler
 - **Models:** Random Forest (n_estimators=300), Logistic Regression, Linear Regression
 - **Split:** 80/20 train-test, stratified, random_state=42
 - **Feature Importance:** SHAP (Python 3.12 venv) + Permutation importance
-
-### SHAP Setup (One-Time)
-```bash
-# Linux/macOS:
-./src/mac_linux_setup_shap.sh
-
-# Windows:
-src\windows_setup_shap.bat
-```
-Run this once before using the complete workflow. If Python 3.12 unavailable, RQ4_Fig6 uses permutation importance.
-
-### PostgreSQL (Optional)
-Airflow DAG loads data to PostgreSQL as parallel branch. Tables: `student_performance_cleaned`, `student_performance_abt`
-```bash
-# Standalone loading (without Airflow)
-python3 -m src.data_ingestion.postgres_loader
-```
 
 ## Folder Structure Explanation
 
