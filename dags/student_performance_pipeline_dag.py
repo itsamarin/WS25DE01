@@ -309,7 +309,7 @@ def task_generate_shap(**context):
     os.makedirs('figures', exist_ok=True)
 
     # Run SHAP generation using the dedicated Python 3.12 virtual environment
-    script_path = os.path.join(project_root, 'generate_shap_with_py312.sh')
+    script_path = os.path.join(project_root, 'src', 'generate_shap_with_py312.sh')
     result = subprocess.run([script_path], cwd=project_root, capture_output=True, text=True)
 
     if result.returncode != 0:

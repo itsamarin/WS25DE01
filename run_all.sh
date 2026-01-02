@@ -61,7 +61,7 @@ echo ""
 # Step 3: Generate SHAP visualization for RQ4_Fig6
 echo "[STEP 3/3] Generating SHAP visualization for RQ4_Fig6..."
 echo "--------------------------------------------------------------------------------"
-./generate_shap_with_py312.sh
+./src/generate_shap_with_py312.sh
 
 if [ $? -ne 0 ]; then
     echo ""

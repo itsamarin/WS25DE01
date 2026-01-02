@@ -117,7 +117,7 @@ python3 -m src.feature_engineering.features # Step 3: Create features
 python3 -m src.modeling.train               # Step 4: Train models
 python3 -m src.evaluation.metrics           # Step 5: Evaluate models
 python3 src/run_simple_analysis.py          # Step 6: Generate all 19 figures and 2 tables
-./generate_shap_with_py312.sh               # Step 7: Generate SHAP visualization for RQ4_Fig6
+./src/generate_shap_with_py312.sh           # Step 7: Generate SHAP visualization for RQ4_Fig6
 ```
 
 **When to use:** Fine-grained control over each pipeline stage, debugging, or learning the workflow.
@@ -248,7 +248,7 @@ GROUP BY course;
 - SHAP (SHapley Additive exPlanations) for interpretable AI explanations
 - Permutation importance (n_repeats=10) with confidence intervals for robust feature ranking
 
-> **Note on SHAP:** SHAP visualizations are automatically generated when using [run_all.sh](run_all.sh). SHAP requires a dedicated Python 3.12 virtual environment at [src/.venv_py312_shap](src/.venv_py312_shap) to resolve dependency compatibility issues. You can also run SHAP separately using [generate_shap_with_py312.sh](generate_shap_with_py312.sh).
+> **Note on SHAP:** SHAP visualizations are automatically generated when using [run_all.sh](run_all.sh). SHAP requires a dedicated Python 3.12 virtual environment at [src/.venv_py312_shap](src/.venv_py312_shap) to resolve dependency compatibility issues. You can also run SHAP separately using [src/generate_shap_with_py312.sh](src/generate_shap_with_py312.sh).
 
 ## SHAP Integration for Model Interpretability
 
@@ -261,7 +261,7 @@ This project includes SHAP (SHapley Additive exPlanations) support for advanced 
 If you need to regenerate only the SHAP visualization:
 ```bash
 # Generate SHAP-based RQ4_Fig6 visualization
-./generate_shap_with_py312.sh
+./src/generate_shap_with_py312.sh
 ```
 
 **Available SHAP Scripts:**
@@ -301,7 +301,7 @@ rm -rf figures/*.pdf tables/*.xlsx
 
 # Or manually run individual steps (SHAP is auto-included in run_all.sh)
 python3 src/run_simple_analysis.py
-./generate_shap_with_py312.sh
+./src/generate_shap_with_py312.sh
 ```
 
 ## Folder Structure Explanation
@@ -343,6 +343,7 @@ WS25DE01/
 │   ├── generate_shap_figure.py             # Alternative SHAP generator
 │   ├── generate_shap_kernel.py             # SHAP KernelExplainer version
 │   ├── generate_enhanced_fig6.py           # Enhanced permutation importance fallback
+│   ├── generate_shap_with_py312.sh         # Shell script to generate SHAP with Python 3.12
 │   └── run_simple_analysis.py              # Main script to generate all figures/tables
 │
 ├── data/                                   # Data storage (NO large raw datasets in Git)
@@ -360,7 +361,6 @@ WS25DE01/
 │
 ├── main.py                                 # Standalone pipeline runner (no Airflow)
 ├── run_all.sh                              # Convenience script to run complete workflow
-├── generate_shap_with_py312.sh             # Shell script to generate SHAP with Python 3.12
 ├── requirements.txt                        # Python dependencies
 ├── .gitignore                              # Git ignore configuration
 └── README.md                               # This file
