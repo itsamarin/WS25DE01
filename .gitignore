@@ -5,6 +5,9 @@
 # Python virtual environments
 src/.venv_py312_shap/
 
+# Airflow home directory (runtime files, logs, database)
+airflow/
+
 # Model files
 src/modeling/models/*.pkl
 src/modeling/models/*.h5
