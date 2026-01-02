@@ -58,8 +58,8 @@ chmod 600 ~/.kaggle/kaggle.json
 | Option | Method | Steps | Runtime | Python Version | Status |
 |--------|--------|-------|---------|----------------|--------|
 | **Option 1** | Automated script | 3 steps | 2-3 min | 3.8+ | ✓ Easiest |
-| **Option 2** | Manual step-by-step | 7 steps | 2-3 min | 3.8+ | ✓ Working |
-| **Option 3** | Airflow DAG | 9 tasks | 2-3 min | **3.12 or earlier** | ✓ Configured |
+| **Option 2** | Manual step-by-step | 7 steps | 3-8 min | 3.8+ | ✓ Working |
+| **Option 3** | Airflow DAG | 9 tasks | 5-15 min | **3.12 or earlier** | ✓ Configured |
 
 ### Option 1: Standalone Pipeline (Easiest)
 
