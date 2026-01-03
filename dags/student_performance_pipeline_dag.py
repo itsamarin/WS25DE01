@@ -311,13 +311,8 @@ def task_generate_shap(**context):
     os.makedirs('figures', exist_ok=True)
 
     # Run SHAP generation using the dedicated Python 3.12 virtual environment
-<<<<<<< HEAD
-    from src.generate_shap_fig6 import main as generate_shap_fig6
+    from src.generate_shap_rq4fig6 import main as generate_shap_fig6
     generate_shap_fig6()
-=======
-    script_path = os.path.join(project_root, 'src', 'mac_linux_generate_shap.sh')
-    result = subprocess.run([script_path], cwd=project_root, capture_output=True, text=True)
->>>>>>> ee3888481789a235254b470846c75dc9881e2afb
 
     print("\n" + "="*70)
     print("SHAP visualization generated successfully!")
