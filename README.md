@@ -274,6 +274,11 @@ WS25DE01/
 ## License & Contact
 
 **Course:** WS25DE01 Data Engineering
-**Contact:** amrin.yanya@gmail.com, David.Joyson@gmail.com
+
+**Team:**
+- Technical Lead: amrin.yanya@gmail.com
+- Documentation & Presentation Lead: David.Joyson@gmail.com
+
 **Dataset:** [UCI ML Repository](https://archive.ics.uci.edu/ml/datasets/Student+Performance) via Kaggle
+
 **Reference:** P. Cortez and A. Silva. "Using Data Mining to Predict Secondary School Student Performance". 2008.
