@@ -1,0 +1,10 @@
+FROM apache/airflow:2.9.3
+# Install build tools as root
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential gcc g++ && rm -rf /var/lib/apt/lists/*
+# Switch to airflow user for pip install
+USER airflow
+COPY requirements.txt /
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r /requirements.txt
+USER 50000

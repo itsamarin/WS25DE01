@@ -1,0 +1,234 @@
+
+version: "3.9"
+
+x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: Dockerfile.airflow
+  image: ws25de01-airflow:latest
+  environment: &airflow-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+    AIRFLOW__CORE__FERNET_KEY: "PLEASE_SET_A_FERNET_KEY"
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "True"
+    # Kaggle credentials
+    KAGGLE_USERNAME: ${KAGGLE_USERNAME:-your_kaggle_username}
+    KAGGLE_KEY: ${KAGGLE_KEY:-your_kaggle_key}
+    # Warehouse connection info (used by your src/* loaders)
+    WAREHOUSE_HOST: warehouse-db
+    WAREHOUSE_PORT: "5432"
+    WAREHOUSE_DB: studentdb
+    WAREHOUSE_USER: student_user
+    WAREHOUSE_PASSWORD: student_pass
+  user: "50000:0"
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./src:/opt/airflow/src
+    - ./data:/opt/airflow/data
+    - ./figures:/opt/airflow/figures
+    - ./tables:/opt/airflow/tables
+    - airflow_logs:/opt/airflow/logs
+    - airflow_plugins:/opt/airflow/plugins
+  depends_on:
+    airflow-db:
+      condition: service_healthy
+  networks:
+    - airflow_net
+  healthcheck:
+    test: ["CMD-SHELL", "airflow info > /dev/null 2>&1 || exit 1"]
+    interval: 30s
+    timeout: 10s
+    retries: 5
+
+services:
+  airflow-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - airflow_db_data:/var/lib/postgresql/data
+      # ✅ Run SQL init scripts on first bootstrap
+      - ./airflow-db-init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - airflow_net
+
+  warehouse-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: student_user
+      POSTGRES_PASSWORD: student_pass
+      POSTGRES_DB: studentdb
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U student_user -d studentdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - warehouse_db_data:/var/lib/postgresql/data
+      # ✅ Run SQL init scripts on first bootstrap
+      - ./warehouse-db-init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - airflow_net
+
+  postgres-student:
+    image: postgres:15
+    container_name: postgres-student
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: student_performance
+    ports:
+      - "5434:5432"
+    networks:
+      - airflow_net
+
+  pgadmin:
+    image: dpage/pgadmin4:8
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      airflow-db:
+        condition: service_started
+      warehouse-db:
+        condition: service_started
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - airflow_net
+
+  airflow-init:
+    <<: *airflow-common
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        set -e
+        # Fail fast if Fernet key is not set
+        if [ "$AIRFLOW__CORE__FERNET_KEY" = "PLEASE_SET_A_FERNET_KEY" ]; then
+          echo "ERROR: Set AIRFLOW__CORE__FERNET_KEY. Generate one with: python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
+          exit 1
+        fi
+        airflow db upgrade
+        airflow users create \
+          --username admin \
+          --firstname Admin \
+          --lastname User \
+          --role Admin \
+          --email admin@local \
+          --password admin || true
+        echo "Airflow initialized."
+    restart: "no"
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  airflow-triggerer:
+    <<: *airflow-common
+    command: triggerer
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  # ✅ NEW: Airflow Flower for monitoring
+  airflow-flower:
+    <<: *airflow-common
+    command: celery flower
+    environment:
+      <<: *airflow-env
+      # Needed by Flower to connect to the broker/executor context
+      AIRFLOW__CELERY__BROKER_URL: "sqlite:///airflow.db"  # LocalExecutor doesn't use Celery broker, but Flower UI still runs
+    ports:
+      - "5555:5555"
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  # ✅ OPTIONAL: Lightweight nightly dumps for both DBs (runs pg_dump then sleeps)
+  airflow-db-backup:
+    image: postgres:15
+    depends_on:
+      airflow-db:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: airflow
+    volumes:
+      - airflow_backups:/backups
+    command: >
+      bash -lc '
+        mkdir -p /backups &&
+        while true; do
+          ts=$(date +%Y%m%d_%H%M%S);
+          pg_dump -h airflow-db -U airflow -d airflow -F c -f /backups/airflow_$ts.dump &&
+          echo "Airflow DB backup at $ts";
+          sleep 86400;
+        done
+      '
+    networks:
+      - airflow_net
+    restart: unless-stopped
+
+  warehouse-db-backup:
+    image: postgres:15
+    depends_on:
+      warehouse-db:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: student_pass
+    volumes:
+      - warehouse_backups:/backups
+    command: >
+      bash -lc '
+        mkdir -p /backups &&
+        while true; do
+          ts=$(date +%Y%m%d_%H%M%S);
+          pg_dump -h warehouse-db -U student_user -d studentdb -F c -f /backups/warehouse_$ts.dump &&
+          echo "Warehouse DB backup at $ts";
+          sleep 86400;
+        done
+      '
+    networks:
+      - airflow_net
+    restart: unless-stopped
+
+networks:
+  airflow_net:
+
+volumes:
+  airflow_db_data:
+  warehouse_db_data:
+  airflow_logs:
+  airflow_plugins:
+  pgadmin_data:
+  airflow_backups:
+  warehouse_backups:

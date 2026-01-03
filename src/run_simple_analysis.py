@@ -413,8 +413,8 @@ def main():
     plt.close()
 
     # RQ4_Fig3: Confusion matrices
-    y_pred_lr = multi_models['logistic_regression'].predict(X_test)
-    y_pred_rf = multi_models['random_forest'].predict(X_test)
+    y_pred_lr = multi_models['logistic_regression']["model"].predict(X_test)
+    y_pred_rf = multi_models['random_forest']["model"].predict(X_test)
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 

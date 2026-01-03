@@ -196,6 +196,8 @@ def eval_model(
     prec = precision_score(y_test, y_pred)
     rec = recall_score(y_test, y_pred)
     f1 = f1_score(y_test, y_pred)
+    cm = confusion_matrix(y_test, y_pred)
+    report = classification_report(y_test, y_pred, output_dict=True)
 
     # Print results
     print(f"\n{'='*16} {name} {'='*16}")
@@ -204,9 +206,17 @@ def eval_model(
     print(f"Recall   : {round(rec, 3)}")
     print(f"F1-score : {round(f1, 3)}")
     print(f"\nClassification report:\n{classification_report(y_test, y_pred)}")
-    print(f"Confusion matrix:\n{confusion_matrix(y_test, y_pred)}")
+    print(f"Confusion matrix:\n{cm}")
 
-    return model
+    return {
+        "model": model,
+        "test_accuracy": acc,
+        "test_precision": prec,
+        "test_recall": rec,
+        "test_f1": f1,
+        "confusion_matrix": cm,
+        "classification_report": report
+    }
 
 
 def train_multi_source_models(
@@ -265,6 +275,10 @@ def train_academic_only_models(
     Returns:
         dict: Dictionary of trained academic-only models
     """
+    # Select only G1 and G2 columns for academic-only models
+    X_train_academic = X_train[["G1", "G2"]].copy()
+    X_test_academic = X_test[["G1", "G2"]].copy()
+
     # Create preprocessor
     preprocessor = create_academic_only_preprocessor()
 
@@ -273,8 +287,8 @@ def train_academic_only_models(
     rf_clf = create_classification_pipeline(preprocessor, "random_forest")
 
     # Train and evaluate
-    log_reg_trained = eval_model("Academic-Only Logistic Regression", log_reg_clf, X_train, y_train, X_test, y_test)
-    rf_trained = eval_model("Academic-Only Random Forest", rf_clf, X_train, y_train, X_test, y_test)
+    log_reg_trained = eval_model("Academic-Only Logistic Regression", log_reg_clf, X_train_academic, y_train, X_test_academic, y_test)
+    rf_trained = eval_model("Academic-Only Random Forest", rf_clf, X_train_academic, y_train, X_test_academic, y_test)
 
     return {
         "academic_logistic_regression": log_reg_trained,
@@ -322,7 +336,12 @@ def train_regression_model(
     print(f"RMSE: {rmse:.4f}")
     print(f"R²  : {r2:.4f}")
 
-    return reg_pipe
+    return {
+        "model": reg_pipe,
+        "mse": mse,
+        "rmse": rmse,
+        "r2": r2
+    }
 
 
 def save_model(model: Pipeline, filepath: str) -> None:
@@ -395,8 +414,11 @@ if __name__ == "__main__":
     X_reg, y_reg = prepare_data(abt, target_col="G3", drop_cols=["G3", "target_pass"])
     X_reg_train, X_reg_test, y_reg_train, y_reg_test = split_data(X_reg, y_reg, stratify=False)
 
+
     # Train regression model
-    reg_model = train_regression_model(X_reg_train, X_reg_test, y_reg_train, y_reg_test)
+    reg_result = train_regression_model(X_reg_train, X_reg_test, y_reg_train, y_reg_test)
+    reg_model = reg_result["model"]
+    print(f"Regression metrics: MSE={reg_result['mse']:.4f}, RMSE={reg_result['rmse']:.4f}, R2={reg_result['r2']:.4f}")
 
     # Save regression model
     save_model(reg_model, "src/modeling/models/linear_regression_model.pkl")

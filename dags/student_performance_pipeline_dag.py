@@ -196,7 +196,9 @@ def task_model_training(**context):
 
     # Train regression model
     print("Training regression model...")
-    reg_model, reg_metrics = train_regression_model(X_train, X_test, y_train, y_test)
+    reg_result = train_regression_model(X_train, X_test, y_train, y_test)
+    reg_model = reg_result["model"]
+    reg_metrics = reg_result
 
     # Push model performance to XCom
     context['ti'].xcom_push(key='rf_accuracy', value=multi_models['random_forest']['test_accuracy'])
@@ -309,16 +311,12 @@ def task_generate_shap(**context):
     os.makedirs('figures', exist_ok=True)
 
     # Run SHAP generation using the dedicated Python 3.12 virtual environment
-    script_path = os.path.join(project_root, 'src', 'generate_shap_with_py312.sh')
-    result = subprocess.run([script_path], cwd=project_root, capture_output=True, text=True)
+    from src.generate_shap_fig6 import main as generate_shap_fig6
+    generate_shap_fig6()
 
-    if result.returncode != 0:
-        print("\nWARNING: SHAP generation failed. RQ4_Fig6 will use permutation importance fallback.")
-        print(f"Error: {result.stderr}")
-    else:
-        print("\n" + "="*70)
-        print("SHAP visualization generated successfully!")
-        print("="*70)
+    print("\n" + "="*70)
+    print("SHAP visualization generated successfully!")
+    print("="*70)
 
     return "SHAP generation completed"
 

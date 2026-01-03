@@ -14,7 +14,7 @@ from typing import Optional
 
 
 def get_postgres_connection_string(
-    host: str = "localhost",
+    host: str = "postgres-student",
     port: int = 5432,
     database: str = "student_performance",
     user: str = "postgres",
@@ -146,13 +146,13 @@ def create_tables(engine):
     CREATE INDEX IF NOT EXISTS idx_abt_target_pass ON student_performance_abt(target_pass);
     """
 
-    with engine.connect() as conn:
-        # Execute each statement separately
+
+    # Use a transaction context for DDL
+    with engine.begin() as conn:
         for statement in create_table_sql.split(';'):
             statement = statement.strip()
             if statement:
                 conn.execute(text(statement))
-        conn.commit()
 
     print("✓ Database tables created successfully")
 
@@ -188,14 +188,14 @@ def load_cleaned_data_to_postgres(
     if connection_string is None:
         connection_string = get_postgres_connection_string()
 
-    engine = create_engine(connection_string)
+    engine = create_engine(connection_string, future=True)
 
     # Create tables
     create_tables(engine)
 
     # Load data to PostgreSQL
     table_name = 'student_performance_cleaned'
-    df.to_sql(table_name, engine, if_exists=if_exists, index=False, method='multi')
+    df.to_sql(table_name, engine, if_exists=if_exists, index=False)
 
     print(f"✓ Loaded {len(df)} rows into table '{table_name}'")
 
@@ -240,11 +240,11 @@ def load_abt_to_postgres(
     if connection_string is None:
         connection_string = get_postgres_connection_string()
 
-    engine = create_engine(connection_string)
+    engine = create_engine(connection_string, future=True)
 
     # Load data to PostgreSQL
     table_name = 'student_performance_abt'
-    df.to_sql(table_name, engine, if_exists=if_exists, index=False, method='multi')
+    df.to_sql(table_name, engine, if_exists=if_exists, index=False)
 
     print(f"✓ Loaded {len(df)} rows into table '{table_name}'")
 
@@ -260,8 +260,8 @@ def load_abt_to_postgres(
             SELECT
                 COUNT(*) as total_students,
                 SUM(CASE WHEN target_pass = 1 THEN 1 ELSE 0 END) as passed,
-                AVG(G3) as avg_final_grade,
-                AVG(avg_prev_grade) as avg_previous_grades
+                AVG("G3") as avg_final_grade,
+                AVG("avg_prev_grade") as avg_previous_grades
             FROM {table_name}
         """))
         stats = result.fetchone()

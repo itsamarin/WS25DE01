@@ -1,5 +1,5 @@
 # Core Data Science Libraries
-pandas>=1.5.0
+pandas>=2.0
 numpy>=1.23.0
 
 # Visualization
@@ -26,5 +26,5 @@ xlrd>=2.0.0
 apache-airflow>=2.7.0
 
 # Database
-sqlalchemy>=2.0.0
+sqlalchemy>=1.4
 psycopg2-binary>=2.9.0
