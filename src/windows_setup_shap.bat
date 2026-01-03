@@ -53,5 +53,5 @@ for /f "tokens=*" %%i in ('src\.venv_py312_shap\Scripts\python -c "import shap; 
 echo SHAP version: %SHAPVER%
 echo.
 echo You can now run SHAP visualizations with:
-echo   run_all_windows.bat
+echo   src\windows_run_all.bat
 echo.
