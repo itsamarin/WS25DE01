@@ -46,7 +46,7 @@ echo ""
 # Step 2: Generate all figures and tables
 echo "[STEP 2/3] Generating all figures and tables..."
 echo "--------------------------------------------------------------------------------"
-python3 src/run_simple_analysis.py
+python3 src/generate_all_figures.py
 
 if [ $? -ne 0 ]; then
     echo ""
@@ -72,14 +72,14 @@ if [ ! -f "src/.venv_py312_shap/bin/python" ]; then
     echo "  RQ4_Fig6 requires SHAP visualization, which needs Python 3.12."
     echo ""
     echo "  To set up the environment (one-time setup):"
-    echo "    ./src/setup_shap_env.sh"
+    echo "    ./src/mac_linux_setup_shap.sh"
     echo ""
     echo "  Current status: RQ4_Fig6 uses permutation importance (temporary)"
     echo "  For the full SHAP beeswarm plot, please run the setup script above."
     echo ""
     echo "========================================================================"
 else
-    ./src/generate_shap_with_py312.sh
+    ./src/mac_linux_generate_shap.sh
 
     if [ $? -ne 0 ]; then
         echo ""
@@ -90,7 +90,7 @@ else
         echo "  RQ4_Fig6 will use permutation importance fallback."
         echo "  To fix SHAP, try reinstalling the environment:"
         echo "    rm -rf src/.venv_py312_shap"
-        echo "    ./src/setup_shap_env.sh"
+        echo "    ./src/mac_linux_setup_shap.sh"
         echo ""
         echo "========================================================================"
     fi

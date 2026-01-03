@@ -55,30 +55,30 @@ chmod 600 ~/.kaggle/kaggle.json
 - 2 XLSX tables (RQ1_Table1.xlsx, RQ3_Table1.xlsx)
 - 2 trained models (rf_pass_prediction.pkl, linear_regression_model.pkl)
 
-| Option | Method | Steps | Runtime | Python Version | Status |
-|--------|--------|-------|---------|----------------|--------|
-| **Option 1** | Automated script | 3 steps | 2-3 min | 3.8+ | ✓ Easiest |
-| **Option 2** | Manual step-by-step | 7 steps | 2-3 min | 3.8+ | ✓ Working |
-| **Option 3** | Airflow DAG | 9 tasks | 2-3 min | **3.12 or earlier** | ✓ Configured |
+| Option | Method | What it runs | Runtime* | Python Version | Best for |
+|--------|--------|--------------|----------|----------------|----------|
+| **Option 1** | Automated script | `main.py` + figures + SHAP | **2-3 min** | 3.8+ | ✓ Quick results |
+| **Option 2** | Manual step-by-step | Individual modules | 3-8 min | 3.8+ | ✓ Learning/debugging |
+| **Option 3** | Airflow DAG | Orchestrated tasks | 5-15 min | **3.12 or earlier** | ✓ Production workflows |
 
 ### Option 1: Standalone Pipeline (Easiest)
 
 **Step 1: First-time setup (one-time only)**
 ```bash
 # Linux/macOS:
-./src/setup_shap_env.sh
+./src/mac_linux_setup_shap.sh
 
 # Windows:
-src\setup_shap_env.bat
+src\windows_setup_shap.bat
 ```
 
 **Step 2: Run complete workflow**
 ```bash
 # Linux/macOS:
-./run_all_mac_linux.sh
+./src/mac_linux_run_all.sh
 
 # Windows:
-run_all_windows.bat
+src\windows_run_all.bat
 ```
 
 **What it does:**
@@ -86,7 +86,7 @@ run_all_windows.bat
 2. Generates all 19 figures and 2 tables
 3. Generates SHAP visualization for RQ4_Fig6
 
-**Note:** For manual control, run: `python main.py` (pipeline only) or `python src/run_simple_analysis.py` (figures only)
+**Note:** For manual control, run: `python main.py` (pipeline only) or `python src/generate_all_figures.py` (figures only)
 
 ### Option 2: Individual Modules (Step-by-step)
 
@@ -97,16 +97,16 @@ python -m src.data_cleaning.cleaner        # Step 2: Clean data
 python -m src.feature_engineering.features # Step 3: Create features
 python -m src.modeling.train               # Step 4: Train models
 python -m src.evaluation.metrics           # Step 5: Evaluate models
-python src/run_simple_analysis.py          # Step 6: Generate all 19 figures and 2 tables
+python src/generate_all_figures.py         # Step 6: Generate all 19 figures and 2 tables
 ```
 
 **Step 7: Generate SHAP visualization for RQ4_Fig6**
 ```bash
 # Linux/macOS:
-./src/generate_shap_with_py312.sh
+./src/mac_linux_generate_shap.sh
 
 # Windows:
-src\.venv_py312_shap\Scripts\python src\generate_shap_fig6.py
+src\.venv_py312_shap\Scripts\python src\generate_shap_rq4fig6.py
 ```
 
 **When to use:** Fine-grained control over each pipeline stage, debugging, or learning the workflow.
@@ -187,31 +187,26 @@ airflow scheduler
 
 **Note:** Python 3.14+ users should use Option 1 or 2 instead due to Airflow 2.x compatibility.
 
----
+#### PostgreSQL Integration (Optional)
 
-## Additional Information
+The Airflow DAG can optionally load data to PostgreSQL as a parallel branch for data warehouse integration.
+
+**Tables created:**
+- `student_performance_cleaned`
+- `student_performance_abt`
+
+**Standalone loading (without Airflow):**
+```bash
+python3 -m src.data_ingestion.postgres_loader
+```
 
 ### Model Configuration
+
 - **Models:** Random Forest (n_estimators=300), Logistic Regression, Linear Regression
 - **Split:** 80/20 train-test, stratified, random_state=42
 - **Feature Importance:** SHAP (Python 3.12 venv) + Permutation importance
 
-### SHAP Setup (One-Time)
-```bash
-# Linux/macOS:
-./src/setup_shap_env.sh
-
-# Windows:
-src\setup_shap_env.bat
-```
-Run this once before using the complete workflow. If Python 3.12 unavailable, RQ4_Fig6 uses permutation importance.
-
-### PostgreSQL (Optional)
-Airflow DAG loads data to PostgreSQL as parallel branch. Tables: `student_performance_cleaned`, `student_performance_abt`
-```bash
-# Standalone loading (without Airflow)
-python3 -m src.data_ingestion.postgres_loader
-```
+---
 
 ## Folder Structure Explanation
 
@@ -248,12 +243,14 @@ WS25DE01/
 │   │   └── visualizations.py               # All RQ figure generation code (RQ1-RQ4)
 │   │
 │   ├── .venv_py312_shap/                   # Python 3.12 virtual environment for SHAP (git-ignored)
-│   ├── generate_shap_fig6.py               # SHAP beeswarm visualization for RQ4_Fig6
-│   ├── generate_enhanced_fig6.py           # Permutation importance fallback for RQ4_Fig6
-│   ├── generate_shap_with_py312.sh         # Shell wrapper to run SHAP (Linux/macOS)
-│   ├── setup_shap_env.sh                   # SHAP environment setup (Linux/macOS)
-│   ├── setup_shap_env.bat                  # SHAP environment setup (Windows)
-│   └── run_simple_analysis.py              # Main script to generate all figures/tables
+│   ├── generate_all_figures.py             # Main script to generate all 19 figures and 2 tables
+│   ├── generate_permutation_rq4fig6.py     # Permutation importance fallback for RQ4_Fig6
+│   ├── generate_shap_rq4fig6.py            # SHAP beeswarm visualization for RQ4_Fig6
+│   ├── mac_linux_generate_shap.sh          # Shell wrapper to run SHAP (Linux/macOS)
+│   ├── mac_linux_run_all.sh                # Complete workflow script (macOS/Linux)
+│   ├── mac_linux_setup_shap.sh             # SHAP environment setup (Linux/macOS)
+│   ├── windows_run_all.bat                 # Complete workflow script (Windows)
+│   └── windows_setup_shap.bat              # SHAP environment setup (Windows)
 │
 ├── data/                                   # Data storage (NO large raw datasets in Git)
 │   └── sample/                             # Sample data files only
@@ -269,8 +266,6 @@ WS25DE01/
 │   └── RQ3_Table1.xlsx                     # Fairness metrics
 │
 ├── main.py                                 # Standalone pipeline runner (no Airflow)
-├── run_all_mac_linux.sh                    # Complete workflow script (macOS/Linux)
-├── run_all_windows.bat                     # Complete workflow script (Windows)
 ├── requirements.txt                        # Python dependencies
 ├── .gitignore                              # Git ignore configuration
 └── README.md                               # This file

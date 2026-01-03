@@ -7,7 +7,7 @@ echo "Using Python 3.12 virtual environment (src/.venv_py312_shap)"
 echo "======================================================================"
 
 # Use Python 3.12 virtual environment directly
-src/.venv_py312_shap/bin/python src/generate_shap_fig6.py
+src/.venv_py312_shap/bin/python src/generate_shap_rq4fig6.py
 
 echo ""
 echo "======================================================================"

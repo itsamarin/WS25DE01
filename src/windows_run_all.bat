@@ -34,7 +34,7 @@ echo.
 REM Step 2: Generate figures and tables
 echo [STEP 2/3] Generating all figures and tables...
 echo --------------------------------------------------------------------------------
-python src/run_simple_analysis.py
+python src/generate_all_figures.py
 if %ERRORLEVEL% neq 0 (
     echo ERROR: Figure generation failed!
     exit /b 1
@@ -66,7 +66,7 @@ if not exist "src\.venv_py312_shap\Scripts\python.exe" (
     echo.
     echo ========================================================================
 ) else (
-    src\.venv_py312_shap\Scripts\python src/generate_shap_fig6.py
+    src\.venv_py312_shap\Scripts\python src/generate_shap_rq4fig6.py
     if %ERRORLEVEL% neq 0 (
         echo.
         echo ========================================================================
