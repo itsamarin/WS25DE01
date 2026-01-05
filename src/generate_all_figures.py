@@ -65,20 +65,21 @@ def main():
         'F1': [0.982, 0.967, 0.955, 0.945]
     })
 
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-    metrics = ['Accuracy', 'Precision', 'Recall', 'F1']
-    for idx, (ax, metric) in enumerate(zip(axes.flatten(), metrics)):
-        ax.bar(results_df['Model'], results_df[metric], color=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728'])
-        ax.set_ylabel(metric, fontsize=12, fontweight='bold')
-        ax.set_ylim(0.85, 1.0)
-        ax.grid(axis='y', alpha=0.3)
-        for i, v in enumerate(results_df[metric]):
-            ax.text(i, v + 0.005, f'{v:.3f}', ha='center', fontsize=9)
+    # Melt the DataFrame to long format for seaborn
+    results_long = results_df.melt(id_vars='Model', var_name='Metric', value_name='Score')
 
-    plt.suptitle('RQ1_Fig1: Model Performance Comparison', fontsize=16, fontweight='bold')
+    plt.figure(figsize=(12, 7))
+    sns.barplot(x='Metric', y='Score', hue='Model', data=results_long, palette='husl')
+    plt.title('RQ1_Fig1 Model Performance Comparison: Multi-Source vs. Single-Source', fontsize=16)
+    plt.xlabel('Metric', fontsize=12)
+    plt.ylabel('Score')
+    plt.ylim(0.8, 1.0)
+    plt.legend(title='Model', bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.tight_layout()
     plt.savefig('figures/RQ1_Fig1.pdf', bbox_inches='tight')
+    print(f"Saved performance comparison plot to figures/RQ1_Fig1.pdf")
     plt.close()
+    print("RQ1_Fig1 Caption: Model Performance Comparison between Multi-Source and Single-Source predictions")
 
     # RQ1_Fig2: Grade scatter plot
     plt.figure(figsize=(10, 6))
