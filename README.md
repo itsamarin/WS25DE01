@@ -58,8 +58,8 @@ chmod 600 ~/.kaggle/kaggle.json
 | Option | Method | What it runs | Runtime* | Python Version | Best for |
 |--------|--------|--------------|----------|----------------|----------|
 | **Option 1** | Automated script | `main.py` + figures + SHAP | **2-3 min** | 3.8+ | ✓ Quick results |
-| **Option 2** | Manual step-by-step | Individual modules | 3-8 min | 3.8+ | ✓ Learning/debugging |
-| **Option 3** | Airflow DAG | Orchestrated tasks | 5-15 min | **3.12 or earlier** | ✓ Production workflows |
+| **Option 2** | Manual step-by-step | Individual modules | **2-3 min** | 3.8+ | ✓ Learning/debugging |
+| **Option 3** | Airflow DAG | Orchestrated tasks | **2-3 min** | **3.12 or earlier** | ✓ Production workflows |
 
 ### Option 1: Standalone Pipeline (Easiest)
 
@@ -124,8 +124,8 @@ src\.venv_py312_shap\Scripts\python src\generate_shap_rq4fig6.py
 #### Approach A: Docker (Recommended - All Platforms)
 
 ```bash
-# Step 1: Download docker-compose.yml
-# Get from: https://airflow.apache.org/docs/apache-airflow/stable/docker-compose.yaml
+# Step 1: Navigate to src directory
+cd src
 
 # Step 2: Initialize Airflow
 docker-compose up airflow-init
@@ -135,7 +135,7 @@ docker-compose up -d
 
 # Step 4: Access Airflow Web UI
 # Open http://localhost:8080 (username/password: airflow/airflow)
-# Copy dags/student_performance_pipeline_dag.py to ./dags folder
+# The DAG is automatically loaded from ../dags/student_performance_pipeline_dag.py
 # Trigger the DAG from the UI
 
 # Step 5: Stop Airflow
@@ -243,6 +243,8 @@ WS25DE01/
 │   │   └── visualizations.py               # All RQ figure generation code (RQ1-RQ4)
 │   │
 │   ├── .venv_py312_shap/                   # Python 3.12 virtual environment for SHAP (git-ignored)
+│   ├── Dockerfile.airflow                  # Airflow Docker image configuration
+│   ├── docker-compose.yml                  # Docker Compose configuration for Airflow
 │   ├── generate_all_figures.py             # Main script to generate all 19 figures and 2 tables
 │   ├── generate_permutation_rq4fig6.py     # Permutation importance fallback for RQ4_Fig6
 │   ├── generate_shap_rq4fig6.py            # SHAP beeswarm visualization for RQ4_Fig6
@@ -274,6 +276,11 @@ WS25DE01/
 ## License & Contact
 
 **Course:** WS25DE01 Data Engineering
-**Contact:** amrin.yanya@gmail.com, David.Joyson@gmail.com
+
+**Team:**
+- Technical Lead: amrin.yanya@gmail.com
+- Documentation & Presentation Lead: David.Joyson@gmail.com
+
 **Dataset:** [UCI ML Repository](https://archive.ics.uci.edu/ml/datasets/Student+Performance) via Kaggle
+
 **Reference:** P. Cortez and A. Silva. "Using Data Mining to Predict Secondary School Student Performance". 2008.
