@@ -57,7 +57,7 @@ chmod 600 ~/.kaggle/kaggle.json
 
 | Option | Method | What it runs | Runtime* | Python Version | Best for |
 |--------|--------|--------------|----------|----------------|----------|
-| **Option 1** | Automated script | `main.py` + figures + SHAP | **2-3 min** | 3.8+ | ✓ Quick results |
+| **Option 1** | Automated script | `main.py` + figures + SHAP | **1-2 min** | 3.8+ | ✓ Quick results |
 | **Option 2** | Manual step-by-step | Individual modules | **2-3 min** | 3.8+ | ✓ Learning/debugging |
 | **Option 3** | Airflow DAG | Orchestrated tasks | **2-3 min** | **3.12 or earlier** | ✓ Production workflows |
 
