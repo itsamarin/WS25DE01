@@ -278,8 +278,8 @@ WS25DE01/
 **Course:** WS25DE01 Data Engineering
 
 **Team:**
-- Technical Lead: amrin.yanya@gmail.com
-- Documentation & Presentation Lead: David.Joyson@gmail.com
+- **Technical Lead:** amrin.yanya@gmail.com
+- **Documentation & Presentation Lead:** David.Joyson@gmail.com
 
 **Dataset:** [UCI ML Repository](https://archive.ics.uci.edu/ml/datasets/Student+Performance) via Kaggle
 
